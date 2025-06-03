@@ -13,6 +13,8 @@ import { CommonModule } from '@angular/common';
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  username: string | null = null;
+  email: string | null = null;
   showPassword = false;
   errorMessage: string | null = null;
   isLoading = false;
@@ -45,20 +47,38 @@ export class LoginComponent {
       password: this.loginForm.value.password
     };
 
+    this.email = credentials.email;
+
     this.http.post<any>('http://localhost:8080/api/users/login', credentials)
       .subscribe({
         next: (isValid) => {
-        if (isValid) {
-          this.router.navigate(['/layout']);
-        } else {
-          this.errorMessage = 'Credenciales incorrectas';
-        }
-        this.isLoading = false;
+          if (isValid) {
+            this.http.get(`http://localhost:8080/api/users/username/${this.email}`, { responseType: 'text' as 'text' })
+              .subscribe({
+                next: (username) => {
+                  if (username) {
+                    this.username = username;
+                    this.router.navigate(['/layout', this.username]);
+                  } else {
+                    this.errorMessage = 'User not found';
+                  }
+                  this.isLoading = false;
+                },
+                error: (error) => {
+                  this.errorMessage = 'Error to fetch username';
+                  this.isLoading = false;
+                  console.error('Error to fetch username', error);
+                }
+              });
+          } else {
+            this.errorMessage = 'Invalid email or password';
+            this.isLoading = false;
+          }
         },
         error: (error) => {
-          this.errorMessage = 'Error al conectar con el servidor';
+          this.errorMessage = 'Error to connect to the server';
           this.isLoading = false;
-          console.error('Error de autenticación:', error);
+          console.error('Error authentication:', error);
         }
       });
   }

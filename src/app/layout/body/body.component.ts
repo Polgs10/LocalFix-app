@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProfessionalCard } from '../../model/professional.model';
 
 @Component({
@@ -15,23 +15,42 @@ export class BodyComponent {
   categories: string[] = [];
   provinces: string[] = [];
   professionals: ProfessionalCard[] = [];
+  username: string | null = null;
   filters = {
     category: '',
     province: '',
-    priceRange: '',
-    minRating: ''
+    experience: '',
+    minRating: '',
+    username : this.username || ''
   };
+  error: string | null = null;
   isLoading = true;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.loadInitialData();
+
+    this.route.paramMap.subscribe(params => {
+      const username = params.get('username');
+      if (username) {
+        this.username = username;
+      } else {
+        this.error = 'Professional not found';
+        this.isLoading = false;
+      }
+    });
+
   }
 
   loadInitialData(): void {
     this.http.get<string[]>('http://localhost:8080/api/guilds/categories').subscribe({
       next: (data) => this.categories = data,
+      error: (err) => console.error('Error loading categories', err)
+    });
+
+    this.http.get<string[]>('http://localhost:8080/api/professional-locations/provinces').subscribe({
+      next: (data) => this.provinces = data,
       error: (err) => console.error('Error loading categories', err)
     });
 
@@ -44,6 +63,7 @@ export class BodyComponent {
 
     if (this.filters.category) params.guildId = this.filters.category;
     if (this.filters.province) params.province = this.filters.province;
+    this.filters.username = this.username || '';
 
     this.http.get<ProfessionalCard[]>('http://localhost:8080/api/professionals', { params }).subscribe({
       next: (data) => {
@@ -68,8 +88,9 @@ export class BodyComponent {
     this.filters = {
       category: '',
       province: '',
-      priceRange: '',
-      minRating: ''
+      experience: '',
+      minRating: '',
+      username : this.username || ''
     };
     this.loadProfessionals();
   }
