@@ -2,18 +2,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-interface Professional {
-  id: number;
-  name: string;
-  guild: string;
-  experience: number;
-  description: string;
-  rating: number;
-  province: string;
-  image?: string;
-}
-
+import { Router } from '@angular/router';
+import { ProfessionalCard } from '../../model/professional.model';
 
 @Component({
   selector: 'app-body',
@@ -24,7 +14,7 @@ interface Professional {
 export class BodyComponent {
   categories: string[] = [];
   provinces: string[] = [];
-  professionals: Professional[] = [];
+  professionals: ProfessionalCard[] = [];
   filters = {
     category: '',
     province: '',
@@ -33,20 +23,18 @@ export class BodyComponent {
   };
   isLoading = true;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
     this.loadInitialData();
   }
 
   loadInitialData(): void {
-    // Cargar categorías de gremios
     this.http.get<string[]>('http://localhost:8080/api/guilds/categories').subscribe({
       next: (data) => this.categories = data,
       error: (err) => console.error('Error loading categories', err)
     });
 
-    // Cargar profesionales
     this.loadProfessionals();
   }
 
@@ -57,11 +45,11 @@ export class BodyComponent {
     if (this.filters.category) params.guildId = this.filters.category;
     if (this.filters.province) params.province = this.filters.province;
 
-    this.http.get<Professional[]>('http://localhost:8080/api/professionals', { params }).subscribe({
+    this.http.get<ProfessionalCard[]>('http://localhost:8080/api/professionals', { params }).subscribe({
       next: (data) => {
         this.professionals = data.map(prof => ({
           ...prof,
-          image: this.getProfessionalImage(prof.guild) // Asignar imagen según gremio
+          image: this.getProfessionalImage(prof.guild)
         }));
         this.isLoading = false;
       },
@@ -87,7 +75,6 @@ export class BodyComponent {
   }
 
   private getProfessionalImage(guild: string): string {
-    // Mapeo de gremios a imágenes (ajusta según tus assets)
     const images: {[key: string]: string} = {
       'Carpintero': 'carpenter.jpg',
       'Fontanero': 'plumber.jpg',
@@ -102,9 +89,13 @@ export class BodyComponent {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     return Array(5).fill(0).map((_, i) => {
-      if (i < fullStars) return 2; // Estrella llena
-      if (i === fullStars && hasHalfStar) return 1; // Media estrella
-      return 0; // Estrella vacía
+      if (i < fullStars) return 2;
+      if (i === fullStars && hasHalfStar) return 1;
+      return 0; //
     });
+  }
+
+  viewProfessionalDetails(professionalUsername: string): void {
+    this.router.navigate(['/details-professional', professionalUsername]);
   }
 }

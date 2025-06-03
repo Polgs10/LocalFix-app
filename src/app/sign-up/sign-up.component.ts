@@ -23,6 +23,7 @@ export class SignUpComponent {
     private router: Router
   ) {
     this.registerForm = this.fb.group({
+      username: ['', Validators.required],
       nombre: ['', Validators.required],
       primerApellido: ['', Validators.required],
       segundoApellido: [''],
@@ -63,6 +64,7 @@ export class SignUpComponent {
 
     const userData = {
       name: this.registerForm.value.nombre,
+      username: this.registerForm.value.username,
       firstName: this.registerForm.value.primerApellido,
       lastName: this.registerForm.value.segundoApellido,
       email: this.registerForm.value.email,
