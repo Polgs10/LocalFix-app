@@ -9,7 +9,7 @@ import { DETAILS_PROFESSIONAL } from './details-professional/details-professiona
 export const routes: Routes = [
   { path: 'login', children: LOGIN_ROUTES },
   { path: 'register', children: SIGNUP},
-  { path: 'layout/:username"', children: LAYOUT_ROUTES },
+  { path: 'layout/:username', children: LAYOUT_ROUTES },
   { path: 'details-professional/:businessName', children: DETAILS_PROFESSIONAL},
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }

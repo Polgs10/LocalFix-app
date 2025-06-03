@@ -21,7 +21,6 @@ export class BodyComponent {
     province: '',
     experience: '',
     minRating: '',
-    username : this.username || ''
   };
   error: string | null = null;
   isLoading = true;
@@ -35,6 +34,7 @@ export class BodyComponent {
       const username = params.get('username');
       if (username) {
         this.username = username;
+        console.log('Username from route:', this.username);
       } else {
         this.error = 'Professional not found';
         this.isLoading = false;
@@ -61,9 +61,11 @@ export class BodyComponent {
     this.isLoading = true;
     let params: any = {};
 
-    if (this.filters.category) params.guildId = this.filters.category;
+    if (this.filters.category) params.category = this.filters.category;
     if (this.filters.province) params.province = this.filters.province;
-    this.filters.username = this.username || '';
+    if (this.filters.experience) params.experience = this.filters.experience;
+    if (this.filters.minRating) params.minRating = this.filters.minRating;
+    if (this.username) params.username = this.username;
 
     this.http.get<ProfessionalCard[]>('http://localhost:8080/api/professionals', { params }).subscribe({
       next: (data) => {
@@ -90,7 +92,6 @@ export class BodyComponent {
       province: '',
       experience: '',
       minRating: '',
-      username : this.username || ''
     };
     this.loadProfessionals();
   }
