@@ -32,7 +32,7 @@ export class UserProfileComponent {
       const username = params.get('username');
       if (username) {
         this.username = username;
-        this.loadProfessionalId(username);
+        this.loadUserId(username);
       } else {
         this.error = 'Professional not found';
         this.isLoading = false;
@@ -41,7 +41,7 @@ export class UserProfileComponent {
 
   }
 
-  loadProfessionalId(username: string): void {
+  loadUserId(username: string): void {
     this.http.get<number>(`http://localhost:8080/api/users/id/${username}`)
       .subscribe({
         next: (id) => {

@@ -77,23 +77,23 @@ export class SignUpComponent {
       country: this.registerForm.value.pais
     };
 
-    this.http.post<boolean>('http://localhost:8080/api/users/register', userData)
-      .subscribe({
-        next: (success) => {
-          if (success) {
-            alert('Usuario registrado correctamente');
-            this.router.navigate(['/login']);
-          } else {
-            this.errorMessage = 'Error al registrar el usuario';
-          }
-          this.isLoading = false;
-        },
-        error: (error) => {
-          this.errorMessage = 'Error al conectar con el servidor';
-          this.isLoading = false;
-          console.error('Error de registro:', error);
+  this.http.post<boolean>('http://localhost:8080/api/users/register', userData)
+    .subscribe({
+      next: (success) => {
+        if (success) {
+          alert('Usuario registrado correctamente');
+          this.router.navigate(['/login']);
+        } else {
+          this.errorMessage = 'Error al registrar el usuario';
         }
-      });
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = 'Error al conectar con el servidor';
+        this.isLoading = false;
+        console.error('Error de registro:', error);
+      }
+    });
   }
 
   resetForm(): void {

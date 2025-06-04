@@ -325,7 +325,7 @@
                     </button>
                 </div>
 
-                <form (ngSubmit)="submitReview()">
+                <form (ngSubmit)="submitReview()" #reviewForm="ngForm">
                     <!-- Puntuación -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Puntuación</label>
@@ -395,12 +395,18 @@
                     <!-- Botones -->
                     <div class="flex space-x-3">
                         <button
-                            type="submit"
-                            class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
-                            [disabled]="selectedRating === 0"
+                          type="submit"
+                          class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+                          [disabled]="selectedRating === 0 || !newReviewComment.trim() || isLoading"
                         >
+                          <span *ngIf="!isLoading">
                             <i class="fas fa-save mr-2"></i>
                             Enviar Valoración
+                          </span>
+                          <span *ngIf="isLoading">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                            Enviando...
+                          </span>
                         </button>
                         <button
                             type="button"

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProfessionalDetails, ProfessionalLocation, ProfessionalRating, ProfessionalService } from '../model/professional.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NewRating } from '../model/rating.model';
 
 @Component({
   selector: 'app-details-professional',
@@ -17,12 +18,20 @@ export class DetailsProfessionalComponent {
   professionalLocations: ProfessionalLocation[] | null = null;
   professionalServices: ProfessionalService[] | null = null;
   professionalRatings: ProfessionalRating[] | null = null;
+
+  userProfileId: number | null = null;
+
+  newRating: NewRating | null = null;
+
+  businessName: string | null = null;
+
   isLoading = true;
   error: string | null = null;
   selectedRating = 0;
   showReviewModal = false;
   newReviewComment = '';
   username: string | null = null;
+  errorMessage: string | null = null;
 
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
 
@@ -32,6 +41,7 @@ export class DetailsProfessionalComponent {
       const username = params.get('username');
       if (username) {
         this.username = username;
+        this.loadUserId(username);
       } else {
         this.error = 'Professional not found';
         this.isLoading = false;
@@ -41,12 +51,68 @@ export class DetailsProfessionalComponent {
     this.route.paramMap.subscribe(params => {
       const businessName = params.get('businessName');
       if (businessName) {
+        this.businessName = businessName;
         this.loadProfessionalId(businessName);
       } else {
         this.error = 'Professional not found';
         this.isLoading = false;
       }
     });
+
+  }
+
+  submitReview(): void {
+    if (!this.userProfileId || !this.professionalId || this.selectedRating === 0) {
+      this.errorMessage = 'Por favor, completa todos los campos requeridos';
+      return;
+    }
+
+  this.isLoading = true;
+
+  const newRating: NewRating = {
+    userId: this.userProfileId,
+    professionalId: this.professionalId,
+    score: this.selectedRating,
+    comment: this.newReviewComment
+  };
+
+  this.http.post<any>('http://localhost:8080/api/ratings/new/rating', newRating)
+    .subscribe({
+      next: (response) => {
+        this.closeReviewModal();
+        this.resetReviewForm();
+        // Recargar las valoraciones para mostrar la nueva
+        this.loadProfessionalRatings();
+        // Actualizar los detalles del profesional (para el promedio)
+        this.loadProfessionalDetails();
+      },
+      error: (error) => {
+        this.errorMessage = 'Error al enviar la valoración. Por favor, inténtalo de nuevo.';
+        console.error('Error submitting review:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  resetReviewForm(): void {
+    this.selectedRating = 0;
+    this.newReviewComment = '';
+    this.errorMessage = null;
+    this.isLoading = false;
+  }
+
+  loadUserId(username: string): void {
+    this.http.get<number>(`http://localhost:8080/api/users/id/${username}`)
+      .subscribe({
+        next: (id) => {
+          this.userProfileId = id;
+        },
+        error: (err) => {
+          this.error = 'User not found';
+          this.isLoading = false;
+          console.error(err);
+        }
+      });
   }
 
   loadProfessionalId(businessName: string): void {
@@ -201,11 +267,6 @@ export class DetailsProfessionalComponent {
 
   closeReviewModal() {
     this.showReviewModal = false;
-  }
-
-  submitReview() : void {
-    console.log('Review submitted');
-    this.closeReviewModal?.();
   }
 
   setRating(rating: number): void {
