@@ -7,6 +7,7 @@ export interface ProfessionalDetails {
   averageRating: number;
   ratingCount: number;
   imageUrl?: string;
+  payment: boolean;
 }
 
 export interface ProfessionalCard {
@@ -21,14 +22,16 @@ export interface ProfessionalCard {
 }
 
 export interface ProfessionalLocation {
+  id: number;
   address: string;
   city: string;
   province: string;
   postalCode: string;
   country: string;
-  phone: string;
+  landlinePhone: string;
+  mobilePhone: string;
   businessHours: string;
-  isPrimary: boolean;
+  primary: boolean;
 }
 
 export interface ProfessionalService {
@@ -39,7 +42,7 @@ export interface ProfessionalService {
 }
 
 export interface ProfessionalRating {
-  userName: string;
+  username: string;
   score: number;
   comment: string;
   date: string;

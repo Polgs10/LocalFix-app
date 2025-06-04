@@ -91,8 +91,16 @@
                         <div class="flex items-center">
                             <i class="fas fa-phone text-blue-600 mr-3"></i>
                             <div>
-                                <p class="font-medium text-gray-800">Teléfono</p>
-                                <p class="text-gray-600">{{getPrimaryLocation()?.phone}}</p>
+                                <p class="font-medium text-gray-800">Teléfono Fijo</p>
+                                <p class="text-gray-600">{{getPrimaryLocation()?.landlinePhone}}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-blue-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-800">Teléfono Móvil</p>
+                                <p class="text-gray-600">{{getPrimaryLocation()?.mobilePhone}}</p>
                             </div>
                         </div>
                     </div>
@@ -110,10 +118,10 @@
                                     <ng-template #noHours>
                                         <p class="text-gray-500">Horario no especificado</p>
                                     </ng-template>
-                                    <div class="flex justify-between font-medium text-green-600 mt-2">
+                                    <!-- <div class="flex justify-between font-medium text-green-600 mt-2">
                                         <span>Emergencias 24h:</span>
                                         <span>Disponible</span>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>
@@ -123,14 +131,14 @@
                 <!-- Botones de acción -->
                 <div class="mt-6 flex flex-col sm:flex-row gap-3">
                     <a
-                        [href]="'tel:' + getPrimaryLocation()?.phone"
+                        [href]="'tel:' + getPrimaryLocation()?.mobilePhone"
                         class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 text-center no-underline"
                     >
                         <i class="fas fa-phone mr-2"></i>
                         Llamar Ahora
                     </a>
                     <a
-                        [href]="'https://wa.me/' + getWhatsAppNumber(getPrimaryLocation()?.phone)"
+                        [href]="'https://wa.me/' + getWhatsAppNumber(getPrimaryLocation()?.mobilePhone)"
                         target="_blank"
                         class="flex-1 bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 text-center no-underline"
                     >
@@ -142,7 +150,62 @@
                         Email
                     </button>
                 </div>
-            </div>
+
+                <div *ngIf="getSecondaryLocations().length > 0" class="mt-8">
+    <h3 class="text-xl font-semibold text-gray-800 mb-4">Otras Ubicaciones</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Iterar SOLO sobre ubicaciones secundarias -->
+        <div *ngFor="let location of getSecondaryLocations()" class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-200">
+                          <div class="flex items-start mb-3">
+                              <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-3"></i>
+                              <div>
+                                  <h4 class="font-medium text-gray-800">{{location.primary ? 'Ubicación Principal' : 'Ubicación'}}</h4>
+                                  <p class="text-gray-600">{{location.address}}</p>
+                                  <p class="text-gray-600">{{location.postalCode}} {{location.city}}, {{location.province}}</p>
+                                  <p class="text-gray-600">{{location.country}}</p>
+                              </div>
+                          </div>
+
+                          <div class="space-y-2 mt-3">
+                              <div class="flex items-center text-sm text-gray-600">
+                                  <i class="fas fa-phone mr-2"></i>
+                                  <span>{{location.landlinePhone || 'Sin teléfono fijo'}}</span>
+                              </div>
+                              <div class="flex items-center text-sm text-gray-600">
+                                  <i class="fas fa-mobile-alt mr-2"></i>
+                                  <span>{{location.mobilePhone || 'Sin teléfono móvil'}}</span>
+                              </div>
+                              <div class="flex items-start text-sm text-gray-600 mt-2">
+                                  <i class="fas fa-clock mt-1 mr-2"></i>
+                                  <div>
+                                      <p class="font-medium">Horario:</p>
+                                      <div *ngIf="location.businessHours; else noHoursSecondary">
+                                          <div [innerHTML]="formatBusinessHours(location.businessHours)"></div>
+                                      </div>
+                                      <ng-template #noHoursSecondary>
+                                          <p class="text-gray-500">Horario no especificado</p>
+                                      </ng-template>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div class="mt-4 flex space-x-2">
+                              <a *ngIf="location.mobilePhone"
+                                [href]="'tel:' + location.mobilePhone"
+                                class="flex-1 bg-blue-100 text-blue-600 py-1 px-3 rounded text-sm text-center hover:bg-blue-200 transition duration-200">
+                                  <i class="fas fa-phone mr-1"></i> Llamar
+                              </a>
+                              <a *ngIf="location.mobilePhone"
+                                [href]="'https://wa.me/' + getWhatsAppNumber(location.mobilePhone)"
+                                target="_blank"
+                                class="flex-1 bg-green-100 text-green-600 py-1 px-3 rounded text-sm text-center hover:bg-green-200 transition duration-200">
+                                  <i class="fab fa-whatsapp mr-1"></i> WhatsApp
+                              </a>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
         </div>
 
         <!-- Servicios Ofrecidos -->
@@ -218,13 +281,13 @@
                   <div class="flex items-start space-x-4">
                       <div class="flex-shrink-0">
                           <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                              {{rating.userName | slice:0:1 | uppercase}}
+                              {{rating.username | slice:0:1 | uppercase}}
                           </div>
                       </div>
                       <div class="flex-1">
                           <div class="flex items-center justify-between mb-2">
                               <div>
-                                  <h4 class="font-semibold text-gray-800">{{rating.userName}}</h4>
+                                  <h4 class="font-semibold text-gray-800">{{ rating?.username || 'Anónimo' }}</h4>
                                   <div class="flex items-center">
                                       <div class="flex text-yellow-400 mr-2">
                                         <ng-container *ngFor="let star of getRatingStars(rating.score)">

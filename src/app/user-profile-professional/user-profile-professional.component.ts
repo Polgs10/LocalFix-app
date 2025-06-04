@@ -1,17 +1,17 @@
-import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { ProfessionalDetails, ProfessionalLocation, ProfessionalRating, ProfessionalService } from '../model/professional.model';
+import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-details-professional',
+  selector: 'app-user-profile-professional',
   imports: [CommonModule, FormsModule],
-  templateUrl: './details-professional.component.html',
-  styleUrl: './details-professional.component.css'
+  templateUrl: './user-profile-professional.component.html',
+  styleUrl: './user-profile-professional.component.css'
 })
-export class DetailsProfessionalComponent {
+export class UserProfileProfessionalComponent {
   professionalId: number | null = null;
   professional: ProfessionalDetails | null = null;
   professionalLocations: ProfessionalLocation[] | null = null;
@@ -27,7 +27,6 @@ export class DetailsProfessionalComponent {
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-
     this.route.paramMap.subscribe(params => {
       const username = params.get('username');
       if (username) {
@@ -54,7 +53,6 @@ export class DetailsProfessionalComponent {
       .subscribe({
         next: (id) => {
           this.professionalId = id;
-
           this.loadProfessionalDetails();
           this.loadProfessionalLocations();
           this.loadProfessionalServices();
@@ -130,14 +128,15 @@ export class DetailsProfessionalComponent {
     this.router.navigate(['/layout', this.username]);
   }
 
-  getSecondaryLocations(): ProfessionalLocation[] {
-    if (!this.professionalLocations || this.professionalLocations.length === 0) return [];
-    return this.professionalLocations.filter(loc => !loc.primary);
-  }
-
   getPrimaryLocation(): ProfessionalLocation | undefined {
     if (!this.professionalLocations || this.professionalLocations.length === 0) return undefined;
-    return this.professionalLocations.find(loc => loc.primary) || this.professionalLocations[0];
+    return this.professionalLocations.find(loc => !loc.primary) || this.professionalLocations[0];
+  }
+
+  getSecondaryLocations(): ProfessionalLocation[] {
+    if (!this.professionalLocations || this.professionalLocations.length <= 1) return [];
+    const primaryId = this.getPrimaryLocation()?.id;
+    return this.professionalLocations.filter(loc => loc.primary && loc.id !== primaryId);
   }
 
   formatBusinessHours(hours: string | undefined): string {
@@ -158,7 +157,6 @@ export class DetailsProfessionalComponent {
     }
     return stars;
   }
-
 
   getRatingDistribution(): {stars: number, count: number, percentage: number}[] {
     if (!this.professionalRatings || !this.professional) return [];
@@ -195,11 +193,36 @@ export class DetailsProfessionalComponent {
 
   closeReviewModal() {
     this.showReviewModal = false;
+    this.selectedRating = 0;
+    this.newReviewComment = '';
   }
 
-  submitReview() : void {
-    console.log('Review submitted');
-    this.closeReviewModal?.();
+  submitReview(): void {
+    if (!this.professionalId || this.selectedRating === 0) return;
+
+    const newRating: Omit<ProfessionalRating, 'id' | 'date'> = {
+      username: 'Usuario Anónimo', // You might want to use the actual user name
+      score: this.selectedRating,
+      comment: this.newReviewComment
+    };
+
+    this.http.post(`http://localhost:8080/api/ratings/${this.professionalId}`, newRating)
+      .subscribe({
+        next: () => {
+          this.loadProfessionalRatings();
+          if (this.professional) {
+            this.professional.ratingCount += 1;
+            // Recalculate average rating - you might want to get this from the server instead
+            const total = this.professionalRatings?.reduce((sum, rating) => sum + rating.score, 0) || 0;
+            this.professional.averageRating = (total + this.selectedRating) / (this.professional.ratingCount);
+          }
+          this.closeReviewModal();
+        },
+        error: (err) => {
+          console.error('Error submitting review', err);
+          // Handle error appropriately
+        }
+      });
   }
 
   setRating(rating: number): void {
