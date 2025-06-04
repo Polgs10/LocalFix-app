@@ -118,6 +118,6 @@ export class BodyComponent {
   }
 
   viewProfessionalDetails(professionalUsername: string): void {
-    this.router.navigate(['/details-professional', professionalUsername]);
+    this.router.navigate([`/details-professional/${this.username}/${professionalUsername}`]);
   }
 }

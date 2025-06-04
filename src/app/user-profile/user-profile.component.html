@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del usuario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<div class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a class="text-gray-600 hover:text-blue-600 mr-4 cursor-pointer" (click)="goBack()">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-800">Mi Perfil</h1>
+                </div>
+                <div class="text-2xl font-bold text-blue-600">Local Fix</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div *ngIf="userProfile && userProfileLocation" class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Header del perfil -->
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-8">
+                <div class="flex items-center space-x-6">
+                    <!-- Foto de perfil -->
+                    <div class="relative">
+                        <img
+                            id="profile-image"
+                            src="https://via.placeholder.com/120x120"
+                            alt="Foto de perfil"
+                            class="w-24 h-24 rounded-full border-4 border-white object-cover"
+                        >
+                        <button
+                            *ngIf="isEditMode"
+                            class="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <i class="fas fa-camera text-gray-600 text-sm"></i>
+                        </button>
+                        <input
+                            id="file-input"
+                            type="file"
+                            accept="image/*"
+                            class="hidden"
+                            (change)="handleImageUpload($event)"
+                        >
+                    </div>
+
+                    <!-- Información básica -->
+                    <div class="text-white flex-1">
+                        <h2 class="text-2xl font-bold">{{ userProfile.name }} {{ userProfile.firstName }} {{ userProfile.lastName }}</h2>
+                        <p class="text-blue-100">{{ userProfile.username }}</p>
+                        <p class="text-blue-100">{{ userProfile.email }}</p>
+                        <p class="text-blue-100 text-sm">Miembro desde: {{ userProfile.date | date:'MMMM yyyy' }}</p>
+                    </div>
+
+                    <!-- Botón de editar -->
+                    <div class="flex-shrink-0">
+                        <button
+                            (click)="toggleEditMode()"
+                            [class]="isEditMode ?
+                                'bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-500 transition duration-200 font-medium' :
+                                'bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-500 transition duration-200 font-medium'"
+                        >
+                            <i class="fas mr-2" [ngClass]="isEditMode ? 'fa-times' : 'fa-edit'"></i>
+                            {{isEditMode ? 'Cancelar Edición' : 'Editar Perfil'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de perfil -->
+            <div class="p-6">
+                <form (ngSubmit)="handleProfileUpdate()">
+                    <!-- Información personal -->
+                    <div class="border-b border-gray-200 pb-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Información Personal</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Username -->
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Nombre de Usuario
+                                </label>
+                                <input
+                                    id="username"
+                                    name="username"
+                                    type="text"
+                                    [(ngModel)]="userProfile.username"
+                                    [readonly]="true"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
+                                >
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Correo Electrónico
+                                </label>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    [(ngModel)]="userProfile.email"
+                                    [readonly]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                            </div>
+
+                            <!-- Nombre -->
+                            <div>
+                                <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Nombre
+                                </label>
+                                <input
+                                    id="nombre"
+                                    name="nombre"
+                                    type="text"
+                                    [(ngModel)]="userProfile.name"
+                                    [readonly]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                            </div>
+
+                            <!-- Primer apellido -->
+                            <div>
+                                <label for="primer-apellido" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Primer Apellido
+                                </label>
+                                <input
+                                    id="primer-apellido"
+                                    name="primer-apellido"
+                                    type="text"
+                                    [(ngModel)]="userProfile.firstName"
+                                    [readonly]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                            </div>
+
+                            <!-- Segundo apellido -->
+                            <div>
+                                <label for="segundo-apellido" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Segundo Apellido
+                                </label>
+                                <input
+                                    id="segundo-apellido"
+                                    name="segundo-apellido"
+                                    type="text"
+                                    [(ngModel)]="userProfile.lastName"
+                                    [readonly]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                            </div>
+
+                            <!-- Teléfono -->
+                            <div>
+                                <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Teléfono
+                                </label>
+                                <input
+                                    id="telefono"
+                                    name="telefono"
+                                    type="tel"
+                                    [(ngModel)]="userProfile.phone"
+                                    [readonly]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dirección -->
+                    <div class="border-b border-gray-200 pb-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Dirección</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Dirección -->
+                            <div class="md:col-span-2">
+                                <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Dirección
+                                </label>
+                                <input
+                                    id="direccion"
+                                    name="direccion"
+                                    type="text"
+                                    [(ngModel)]="userProfileLocation.address"
+                                    [readonly]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                            </div>
+
+                            <!-- Ciudad -->
+                            <div>
+                                <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Ciudad
+                                </label>
+                                <input
+                                    id="ciudad"
+                                    name="ciudad"
+                                    type="text"
+                                    [(ngModel)]="userProfileLocation.city"
+                                    [readonly]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                            </div>
+
+                            <!-- Provincia -->
+                            <div>
+                                <label for="provincia" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Provincia
+                                </label>
+                                <select
+                                    id="provincia"
+                                    name="provincia"
+                                    [(ngModel)]="userProfileLocation.province"
+                                    [disabled]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                                    <option value="madrid">Madrid</option>
+                                    <option value="barcelona">Barcelona</option>
+                                    <option value="valencia">Valencia</option>
+                                    <option value="sevilla">Sevilla</option>
+                                    <option value="zaragoza">Zaragoza</option>
+                                </select>
+                            </div>
+
+                            <!-- Código postal -->
+                            <div>
+                                <label for="codigo-postal" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Código Postal
+                                </label>
+                                <input
+                                    id="codigo-postal"
+                                    name="codigo-postal"
+                                    type="text"
+                                    [(ngModel)]="userProfileLocation.postalCode"
+                                    [readonly]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                            </div>
+
+                            <!-- País -->
+                            <div>
+                                <label for="pais" class="block text-sm font-medium text-gray-700 mb-2">
+                                    País
+                                </label>
+                                <select
+                                    id="pais"
+                                    name="pais"
+                                    [(ngModel)]="userProfileLocation.country"
+                                    [disabled]="!isEditMode"
+                                    [class]="isEditMode ?
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
+                                        'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
+                                >
+                                    <option value="es">España</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div *ngIf="isEditMode" class="flex flex-col sm:flex-row gap-4 pt-6">
+                        <button
+                            type="submit"
+                            class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+                        >
+                            <i class="fas fa-save mr-2"></i>
+                            Guardar Cambios
+                        </button>
+                        <button
+                            type="button"
+                            (click)="toggleEditMode()"
+                            class="flex-1 bg-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200"
+                        >
+                            <i class="fas fa-times mr-2"></i>
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Estadísticas del usuario -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Valoraciones realizadas -->
+            <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                <div class="text-3xl font-bold text-blue-600 mb-2">{{ userProfile?.ratingCount || 0 }}</div>
+                <div class="text-gray-600">Valoraciones Realizadas</div>
+            </div>
+
+            <!-- Tiempo como miembro -->
+            <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                <div class="text-3xl font-bold text-purple-600 mb-2">{{ getYearsAsMember() }}</div>
+                <div class="text-gray-600">Años como Miembro</div>
+            </div>
+        </div>
+
+        <!-- Valoraciones realizadas por el usuario -->
+        <div *ngIf="userProfileRatings && userProfileRatings.length > 0" class="mt-8 bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-semibold text-gray-800">Mis Valoraciones</h3>
+            </div>
+
+            <!-- Lista de valoraciones -->
+            <div class="space-y-6">
+                <!-- Valoración -->
+                <div *ngFor="let rating of userProfileRatings" class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <a href="#" class="text-lg font-semibold text-blue-600 hover:text-blue-800 transition duration-200">{{ rating.businessName }}</a>
+                        <span class="text-sm text-gray-500">{{ rating.date | date:'d \'de\' MMMM, yyyy' }}</span>
+                    </div>
+                    <div class="flex items-center mb-3">
+                        <div class="flex text-yellow-400 mr-2">
+                            <i *ngFor="let star of getStars(rating.score)" [class]="star"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">{{ rating.score.toFixed(1) }}</span>
+                    </div>
+                    <p class="text-gray-700">
+                        {{ rating.comment }}
+                    </p>
+                    <div class="flex justify-end mt-3">
+                        <button class="text-gray-500 hover:text-blue-600 mr-3 transition duration-200">
+                            <i class="fas fa-edit mr-1"></i>
+                            Editar
+                        </button>
+                        <button class="text-gray-500 hover:text-red-600 transition duration-200">
+                            <i class="fas fa-trash-alt mr-1"></i>
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

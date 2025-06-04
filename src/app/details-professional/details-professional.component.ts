@@ -22,10 +22,22 @@ export class DetailsProfessionalComponent {
   selectedRating = 0;
   showReviewModal = false;
   newReviewComment = '';
+  username: string | null = null;
 
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
+
+    this.route.paramMap.subscribe(params => {
+      const username = params.get('username');
+      if (username) {
+        this.username = username;
+      } else {
+        this.error = 'Professional not found';
+        this.isLoading = false;
+      }
+    });
+
     this.route.paramMap.subscribe(params => {
       const businessName = params.get('businessName');
       if (businessName) {
@@ -63,7 +75,6 @@ export class DetailsProfessionalComponent {
       .subscribe({
         next: (data) => {
           this.professional = data;
-          console.log('Professional details loaded:', this.professional);
         },
         error: (err) => {
           console.error('Error loading professional details', err);
@@ -92,7 +103,6 @@ export class DetailsProfessionalComponent {
       .subscribe({
         next: (data) => {
           this.professionalServices = data;
-          console.log('Services loaded:', this.professionalServices);
         },
         error: (err) => {
           console.error('Error loading services', err);
@@ -106,7 +116,6 @@ export class DetailsProfessionalComponent {
       .subscribe({
         next: (data) => {
           this.professionalRatings = data;
-          console.log('Ratings loaded:', this.professionalRatings);
           this.isLoading = false;
         },
         error: (err) => {
@@ -118,7 +127,7 @@ export class DetailsProfessionalComponent {
   }
 
   goBack(): void {
-    this.router.navigate(['/layout']);
+    this.router.navigate(['/layout', this.username]);
   }
 
   getPrimaryLocation(): ProfessionalLocation | undefined {
