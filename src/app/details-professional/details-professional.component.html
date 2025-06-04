@@ -248,16 +248,9 @@
                   <div class="flex items-center">
                       <div class="text-4xl font-bold text-gray-800 mr-4">{{professional.averageRating | number:'1.1-1'}}</div>
                       <div>
-                          <div class="flex text-yellow-400 mb-1">
-                              <i *ngFor="let star of getRatingStars(professional.averageRating)"
-                                  [class.fas]="star === 2"
-                                  [class.fa-star]="star === 2"
-                                  [class.fas]="star === 1"
-                                  [class.fa-star-half-alt]="star === 1"
-                                  [class.far]="star === 0"
-                                  [class.fa-star]="star === 0">
-                              </i>
-                          </div>
+                          <div class="flex text-yellow-400 mr-2">
+                            <i *ngFor="let star of getStars(professional.averageRating)" [class]="star"></i>
+                        </div>
                           <p class="text-sm text-gray-600">Basado en {{professional.ratingCount}} valoraciones</p>
                       </div>
                   </div>
@@ -290,16 +283,7 @@
                                   <h4 class="font-semibold text-gray-800">{{ rating?.username || 'Anónimo' }}</h4>
                                   <div class="flex items-center">
                                       <div class="flex text-yellow-400 mr-2">
-                                        <ng-container *ngFor="let star of getRatingStars(rating.score)">
-                                          <i
-                                            class="text-sm"
-                                            [ngClass]="{
-                                              'fas fa-star': star === 2,
-                                              'fas fa-star-half-alt': star === 1,
-                                              'far fa-star': star === 0
-                                            }">
-                                          </i>
-                                        </ng-container>
+                                        <i *ngFor="let star of getStars(rating.score)" [class]="star"></i>
                                       </div>
                                       <span class="text-sm text-gray-600">{{rating.score | number:'1.1-1'}}</span>
                                   </div>

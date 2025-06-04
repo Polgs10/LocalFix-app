@@ -145,20 +145,26 @@ export class DetailsProfessionalComponent {
     return hours.replace(/\n/g, '<br>');
   }
 
-  getRatingStars(score: number): number[] {
+  getStars(score: number): string[] {
     const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      if (score >= i) {
-        stars.push(2); // estrella llena
-      } else if (score >= i - 0.5) {
-        stars.push(1); // media estrella
-      } else {
-        stars.push(0); // estrella vacía
-      }
+    const fullStars = Math.floor(score);
+    const hasHalfStar = score % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push('fas fa-star');
     }
+
+    if (hasHalfStar) {
+      stars.push('fas fa-star-half-alt');
+    }
+
+    const remainingStars = 5 - stars.length;
+    for (let i = 0; i < remainingStars; i++) {
+      stars.push('far fa-star');
+    }
+
     return stars;
   }
-
 
   getRatingDistribution(): {stars: number, count: number, percentage: number}[] {
     if (!this.professionalRatings || !this.professional) return [];
