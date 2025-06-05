@@ -91,6 +91,10 @@ export class UserProfileComponent {
 
   }
 
+  compareFn(o1: any, o2: any): boolean {
+    return o1 && o2 ? o1.toLowerCase() === o2.toLowerCase() : o1 === o2;
+  }
+
   loadUserProfileRatings(): void {
     if (!this.userProfileId) return;
 
@@ -107,34 +111,8 @@ export class UserProfileComponent {
 
   }
 
-  // Datos del usuario (puedes cargarlos desde un servicio)
-  userData = {
-    username: 'juanperez',
-    email: 'juan.perez@email.com',
-    nombre: 'Juan',
-    primerApellido: 'Pérez',
-    segundoApellido: 'García',
-    telefono: '123456789',
-    direccion: 'Calle Principal 123, 4º B',
-    ciudad: 'Madrid',
-    provincia: 'madrid',
-    codigoPostal: '28001',
-    pais: 'es',
-    notifications: true,
-    newsletter: false,
-    idioma: 'es'
-  };
-
   toggleEditMode() {
     this.isEditMode = !this.isEditMode;
-
-    if (this.isEditMode) {
-      // Guardar valores originales al entrar en modo edición
-      this.originalValues = {...this.userData};
-    } else {
-      // Restaurar valores originales al cancelar
-      this.userData = {...this.originalValues};
-    }
   }
 
   handleImageUpload(event: any) {
@@ -150,17 +128,8 @@ export class UserProfileComponent {
   }
 
   handleProfileUpdate() {
-    // Validaciones básicas
-    if (!this.userData.nombre || !this.userData.email || !this.userData.telefono) {
-      alert('Por favor, completa todos los campos obligatorios');
-      return;
-    }
-
-    // Aquí iría la lógica para enviar los datos al servidor
-    console.log('Perfil actualizado', this.userData);
     alert('Perfil actualizado correctamente');
 
-    // Salir del modo edición
     this.isEditMode = false;
   }
 

@@ -294,6 +294,7 @@
                                 <option value="palmas">Las Palmas</option>
                                 <option value="bilbao">Vizcaya</option>
                                 <option value="alicante">Alicante</option>
+                                <option value="alicante">Granada</option>
                                 <!-- Añadir más provincias según necesidad -->
                             </select>
                         </div>
@@ -450,115 +451,5 @@
             </div>
         </div>
     </main>
-
-    <script>
-        function goBack() {
-            window.history.back();
-        }
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                // Validar tamaño del archivo (5MB máximo)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
-                    return;
-                }
-
-                // Validar tipo de archivo
-                if (!file.type.startsWith('image/')) {
-                    alert('Por favor, selecciona un archivo de imagen válido.');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('business-preview').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function handleRegistration(event) {
-            event.preventDefault();
-
-            // Validar descripción
-            const description = document.getElementById('description').value;
-            if (description.length < 50) {
-                alert('La descripción debe tener al menos 50 caracteres.');
-                return;
-            }
-
-            // Validar teléfonos
-            const mobilePhone = document.getElementById('mobile-phone').value;
-            if (!mobilePhone) {
-                alert('El teléfono móvil es obligatorio.');
-                return;
-            }
-
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Registrando...';
-            submitBtn.disabled = true;
-
-            // Simular envío del formulario
-            setTimeout(() => {
-                alert('¡Registro enviado correctamente! Recibirás un email cuando tu perfil sea aprobado.');
-
-                // Aquí enviarías los datos al servidor
-                console.log('Datos del formulario:', new FormData(event.target));
-
-                // Redirigir a página de confirmación
-                // window.location.href = '/confirmacion-registro';
-
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }, 3000);
-        }
-
-        function cancelRegistration() {
-            if (confirm('¿Estás seguro de que deseas cancelar el registro? Se perderán todos los datos introducidos.')) {
-                window.history.back();
-            }
-        }
-
-        // Validación en tiempo real
-        document.addEventListener('DOMContentLoaded', function() {
-            // Validar código postal
-            const postalCode = document.getElementById('postal-code');
-            postalCode.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, '').substring(0, 5);
-            });
-
-            // Validar años de experiencia
-            const experience = document.getElementById('experience');
-            experience.addEventListener('input', function() {
-                if (this.value < 0) this.value = 0;
-                if (this.value > 50) this.value = 50;
-            });
-
-            // Contador de caracteres para descripción
-            const description = document.getElementById('description');
-            description.addEventListener('input', function() {
-                const length = this.value.length;
-                const parent = this.parentElement;
-                let counter = parent.querySelector('.char-counter');
-
-                if (!counter) {
-                    counter = document.createElement('p');
-                    counter.className = 'char-counter text-xs mt-1';
-                    parent.appendChild(counter);
-                }
-
-                counter.textContent = `${length}/500 caracteres`;
-                counter.className = `char-counter text-xs mt-1 ${length < 50 ? 'text-red-500' : length > 500 ? 'text-red-500' : 'text-gray-500'}`;
-
-                if (length > 500) {
-                    this.value = this.value.substring(0, 500);
-                }
-            });
-        });
-    </script>
 </body>
 </html>

@@ -72,51 +72,6 @@ export class PaymentComponent {
     input.value = value;
   }
 
-  applyDiscount() {
-    const discountCode = (document.getElementById('discount-code') as HTMLInputElement).value.trim().toUpperCase();
-    const discountMessage = document.getElementById('discount-message');
-    const discountRow = document.getElementById('discount-row');
-    const discountAmount = document.getElementById('discount-amount');
-
-    // Códigos de descuento válidos
-    const validCodes: {[key: string]: number} = {
-      'WELCOME10': 10,
-      'SAVE20': 20,
-      'STUDENT15': 15,
-      'FIRST5': 5
-    };
-
-    if (validCodes[discountCode]) {
-      this.currentDiscount = validCodes[discountCode];
-      if (discountMessage) {
-        discountMessage.textContent = `¡Código aplicado! Descuento del ${this.currentDiscount}%`;
-        discountMessage.className = 'mt-2 text-sm text-green-600';
-        discountMessage.classList.remove('hidden');
-      }
-      if (discountRow) discountRow.style.display = 'flex';
-
-      const discountValue = (this.basePrice * this.currentDiscount) / 100;
-      if (discountAmount) discountAmount.textContent = `-${discountValue.toFixed(2)}€`;
-
-      this.updateTotals();
-    } else if (discountCode === '') {
-      if (discountMessage) {
-        discountMessage.textContent = 'Por favor, introduce un código de descuento';
-        discountMessage.className = 'mt-2 text-sm text-gray-500';
-        discountMessage.classList.remove('hidden');
-      }
-    } else {
-      if (discountMessage) {
-        discountMessage.textContent = 'Código de descuento no válido';
-        discountMessage.className = 'mt-2 text-sm text-red-600';
-        discountMessage.classList.remove('hidden');
-      }
-      this.currentDiscount = 0;
-      if (discountRow) discountRow.style.display = 'none';
-      this.updateTotals();
-    }
-  }
-
   updateTotals() {
     const discountValue = (this.basePrice * this.currentDiscount) / 100;
     const subtotalAfterDiscount = this.basePrice - discountValue;

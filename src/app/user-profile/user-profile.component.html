@@ -231,16 +231,24 @@
                                     id="provincia"
                                     name="provincia"
                                     [(ngModel)]="userProfileLocation.province"
+                                    [compareWith]="compareFn"
                                     [disabled]="!isEditMode"
                                     [class]="isEditMode ?
                                         'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
                                         'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
                                 >
+                                    <option value="">Selecciona provincia</option>
                                     <option value="madrid">Madrid</option>
                                     <option value="barcelona">Barcelona</option>
                                     <option value="valencia">Valencia</option>
                                     <option value="sevilla">Sevilla</option>
                                     <option value="zaragoza">Zaragoza</option>
+                                    <option value="malaga">Málaga</option>
+                                    <option value="murcia">Murcia</option>
+                                    <option value="palmas">Las Palmas</option>
+                                    <option value="bilbao">Vizcaya</option>
+                                    <option value="alicante">Alicante</option>
+                                    <option value="granada">Granada</option>
                                 </select>
                             </div>
 
@@ -275,7 +283,7 @@
                                         'w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900' :
                                         'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed'"
                                 >
-                                    <option value="es">España</option>
+                                    <option value="España">España</option>
                                 </select>
                             </div>
                         </div>
