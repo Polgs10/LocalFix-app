@@ -9,6 +9,7 @@ export interface UserProfile {
   password: string;
   date: string;
   ratingCount: number;
+  averageRating: number;
 }
 
 export interface UserProfileLocation {

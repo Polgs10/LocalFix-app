@@ -120,4 +120,25 @@ export class BodyComponent {
   viewProfessionalDetails(professionalUsername: string): void {
     this.router.navigate([`/details-professional/${this.username}/${professionalUsername}`]);
   }
+
+  getStars(score: number): string[] {
+    const stars = [];
+    const fullStars = Math.floor(score);
+    const hasHalfStar = score % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push('fas fa-star');
+    }
+
+    if (hasHalfStar) {
+      stars.push('fas fa-star-half-alt');
+    }
+
+    const remainingStars = 5 - stars.length;
+    for (let i = 0; i < remainingStars; i++) {
+      stars.push('far fa-star');
+    }
+
+    return stars;
+  }
 }

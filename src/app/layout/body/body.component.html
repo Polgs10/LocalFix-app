@@ -1,3 +1,12 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <!-- Filtros -->
   <div class="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -79,11 +88,9 @@
 
         <div class="flex items-center justify-between">
           <div class="text-yellow-400">
-            <span *ngFor="let star of getRatingStars(prof.rating)">
-              <i *ngIf="star === 2" class="fas fa-star text-lg"></i>
-              <i *ngIf="star === 1" class="fas fa-star-half-alt text-lg"></i>
-              <i *ngIf="star === 0" class="far fa-star text-lg"></i>
-            </span>
+            <div class="flex text-yellow-400 mr-2">
+              <i *ngFor="let star of getStars(prof.rating)" [class]="star"></i>
+            </div>
             <span class="text-sm text-gray-600 ml-1">{{prof.rating | number:'1.1-1'}}</span>
           </div>
           <button class="bg-blue-100 text-blue-600 px-3 py-1 rounded-md text-sm hover:bg-blue-200"
