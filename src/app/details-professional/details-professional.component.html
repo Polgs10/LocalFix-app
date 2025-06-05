@@ -76,8 +76,9 @@
             <div class="p-6" *ngIf="professionalLocations && professionalLocations.length">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Información de Contacto</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Dirección -->
+                    <!-- Columna izquierda -->
                     <div class="space-y-3">
+                        <!-- Dirección -->
                         <div class="flex items-start">
                             <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-3"></i>
                             <div>
@@ -88,25 +89,37 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center">
-                            <i class="fas fa-phone text-blue-600 mr-3"></i>
+                        <!-- Correo electrónico -->
+                        <div class="flex items-start">
+                            <i class="fas fa-envelope text-blue-600 mt-1 mr-3"></i>
                             <div>
-                                <p class="font-medium text-gray-800">Teléfono Fijo</p>
-                                <p class="text-gray-600">{{getPrimaryLocation()?.landlinePhone}}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center">
-                            <i class="fas fa-phone text-blue-600 mr-3"></i>
-                            <div>
-                                <p class="font-medium text-gray-800">Teléfono Móvil</p>
-                                <p class="text-gray-600">{{getPrimaryLocation()?.mobilePhone}}</p>
+                                <p class="font-medium text-gray-800">Correo Electrónico</p>
+                                <p class="text-gray-600 break-all">{{professional.email || 'No disponible'}}</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Horario -->
-                    <div>
+                    <!-- Columna derecha -->
+                    <div class="space-y-3">
+                        <!-- Teléfono fijo -->
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-blue-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-800">Teléfono Fijo</p>
+                                <p class="text-gray-600">{{getPrimaryLocation()?.landlinePhone || 'No disponible'}}</p>
+                            </div>
+                        </div>
+
+                        <!-- Teléfono móvil -->
+                        <div class="flex items-center">
+                            <i class="fas fa-mobile-alt text-blue-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-800">Teléfono Móvil</p>
+                                <p class="text-gray-600">{{getPrimaryLocation()?.mobilePhone || 'No disponible'}}</p>
+                            </div>
+                        </div>
+
+                        <!-- Horario -->
                         <div class="flex items-start">
                             <i class="fas fa-clock text-blue-600 mt-1 mr-3"></i>
                             <div>
@@ -118,15 +131,12 @@
                                     <ng-template #noHours>
                                         <p class="text-gray-500">Horario no especificado</p>
                                     </ng-template>
-                                    <!-- <div class="flex justify-between font-medium text-green-600 mt-2">
-                                        <span>Emergencias 24h:</span>
-                                        <span>Disponible</span>
-                                    </div> -->
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Botones de acción -->
                 <div class="mt-6 flex flex-col sm:flex-row gap-3">
@@ -145,18 +155,20 @@
                         <i class="fab fa-whatsapp mr-2"></i>
                         WhatsApp
                     </a>
-                    <button class="flex-1 bg-gray-600 text-white py-3 px-6 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200">
-                        <i class="fas fa-envelope mr-2"></i>
-                        Email
+                    <button
+                      (click)="openEmailModal()"
+                      class="flex-1 bg-gray-600 text-white py-3 px-6 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200">
+                      <i class="fas fa-envelope mr-2"></i>
+                      Email
                     </button>
                 </div>
 
                 <div *ngIf="getSecondaryLocations().length > 0" class="mt-8">
-    <h3 class="text-xl font-semibold text-gray-800 mb-4">Otras Ubicaciones</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Iterar SOLO sobre ubicaciones secundarias -->
-        <div *ngFor="let location of getSecondaryLocations()" class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-200">
-                          <div class="flex items-start mb-3">
+                  <h3 class="text-xl font-semibold text-gray-800 mb-4">Otras Ubicaciones</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <!-- Iterar SOLO sobre ubicaciones secundarias -->
+                      <div *ngFor="let location of getSecondaryLocations()" class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-200">
+                                        <div class="flex items-start mb-3">
                               <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-3"></i>
                               <div>
                                   <h4 class="font-medium text-gray-800">{{location.primary ? 'Ubicación Principal' : 'Ubicación'}}</h4>
@@ -421,5 +433,106 @@
             </div>
         </div>
     </div>
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4" *ngIf="showEmailModal">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Enviar Correo Electrónico</h3>
+                <button (click)="closeEmailModal()" class="text-gray-400 hover:text-gray-600 transition duration-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form (ngSubmit)="sendEmail()" #emailForm="ngForm">
+                <!-- De (email del usuario) -->
+                <div class="mb-4">
+                    <label for="from" class="block text-sm font-medium text-gray-700 mb-2">De</label>
+                    <input
+                        type="email"
+                        id="from"
+                        [(ngModel)]="emailData.from"
+                        name="from"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+
+                    >
+                </div>
+
+                <!-- Para (email del profesional) -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Para</label>
+                    <input
+                        type="email"
+                        [(ngModel)]="emailData.to"
+                        name="to"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        [value]="professional?.email"
+                        readonly
+                    >
+                </div>
+
+                <!-- Asunto -->
+                <div class="mb-4">
+                    <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Asunto</label>
+                    <input
+                        type="text"
+                        id="subject"
+                        [(ngModel)]="emailData.subject"
+                        name="subject"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Asunto del mensaje"
+                    >
+                </div>
+
+                <!-- Cuerpo del mensaje -->
+                <div class="mb-4">
+                    <label for="body" class="block text-sm font-medium text-gray-700 mb-2">Mensaje</label>
+                    <textarea
+                        id="body"
+                        [(ngModel)]="emailData.body"
+                        name="body"
+                        rows="5"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Escribe tu mensaje aquí..."
+                    ></textarea>
+                </div>
+
+                <!-- Mensaje de error -->
+                <div *ngIf="errorMessage" class="mb-4 text-red-500 text-sm">
+                    {{ errorMessage }}
+                </div>
+
+                <!-- Botones -->
+                <div class="flex space-x-3">
+                    <button
+                        type="submit"
+                        class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+                        [disabled]="isSendingEmail"
+                    >
+                        <span *ngIf="!isSendingEmail">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Enviar
+                        </span>
+                        <span *ngIf="isSendingEmail">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                            Enviando...
+                        </span>
+                    </button>
+                    <button
+                        type="button"
+                        (click)="closeEmailModal()"
+                        class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200"
+                    >
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 </body>
 </html>

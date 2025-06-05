@@ -4,6 +4,7 @@ export interface ProfessionalDetails {
   guild: string;
   experience: number;
   description: string;
+  email: string;
   averageRating: number;
   ratingCount: number;
   imageUrl?: string;

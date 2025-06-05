@@ -31,6 +31,7 @@ export class RegisterProfessionalComponent {
     address: '',
     city: '',
     postalCode: '',
+    email: '',
     province: '',
     country: 'España',
     businessHours: '',

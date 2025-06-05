@@ -5,6 +5,7 @@ import { ProfessionalDetails, ProfessionalLocation, ProfessionalRating, Professi
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NewRating } from '../model/rating.model';
+import { UserProfile } from '../model/user.model';
 
 @Component({
   selector: 'app-details-professional',
@@ -271,5 +272,60 @@ export class DetailsProfessionalComponent {
 
   setRating(rating: number): void {
     this.selectedRating = rating;
+  }
+
+
+
+  showEmailModal = false;
+  isSendingEmail = false;
+  emailData = {
+    from: '',
+    to: '', // Se establecerá con el email del profesional
+    subject: '',
+    body: ''
+  };
+
+  openEmailModal(): void {
+    this.showEmailModal = true;
+    // Establecer el email del profesional si está disponible
+    if (this.professional?.email) {
+      this.emailData.to = this.professional.email;
+    }
+  }
+
+  closeEmailModal(): void {
+    this.showEmailModal = false;
+    this.resetEmailForm();
+  }
+
+  resetEmailForm(): void {
+    this.emailData = {
+      from: '',
+      to: this.professional?.email || '',
+      subject: '',
+      body: ''
+    };
+    this.isSendingEmail = false;
+  }
+
+  sendEmail(): void {
+    if (!this.emailData.from || !this.emailData.to || !this.emailData.subject || !this.emailData.body) {
+      this.errorMessage = 'Por favor, completa todos los campos requeridos';
+      return;
+    }
+
+    this.isSendingEmail = true;
+
+    // Opción 1: Abrir el cliente de email del usuario (como está actualmente)
+    const subject = encodeURIComponent(this.emailData.subject);
+    const body = encodeURIComponent(
+      this.emailData.body +
+      `\n\nEnviado desde LocalFix por ${this.emailData.from}`
+    );
+
+    const mailtoLink = `mailto:${this.emailData.to}?subject=${subject}&body=${body}`;
+    window.location.href = mailtoLink;
+
+    this.closeEmailModal();
   }
 }
