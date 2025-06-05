@@ -311,7 +311,7 @@ export class UserProfileProfessionalComponent {
     }
   }
 
-  goBack(): void {
-    this.router.navigate(['/']);
+  goBack() {
+    this.router.navigate(['/layout', this.username]);
   }
 }

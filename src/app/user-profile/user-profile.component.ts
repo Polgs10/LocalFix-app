@@ -38,7 +38,7 @@ export class UserProfileComponent {
         this.username = username;
         this.loadUserId(username);
       } else {
-        this.error = 'Professional not found';
+        this.error = 'User not found';
         this.isLoading = false;
       }
     });
