@@ -7,6 +7,7 @@ import { USER_PROFILE } from './user-profile/user-profile-routing';
 import { DETAILS_PROFESSIONAL } from './details-professional/details-professional-routing';
 import { USER_PROFILE_PROFESSIONAL } from './user-profile-professional/user-profile-routing';
 import { PAYMENT } from './payment/payment-routing';
+import { REGISTER_PROFESSIONAL } from './register-professional/register-professional-routing';
 
 
 export const routes: Routes = [
@@ -17,6 +18,7 @@ export const routes: Routes = [
   { path: 'user/profile/:username', children: USER_PROFILE },
   { path: 'user/professional-profile/:username', children: USER_PROFILE_PROFESSIONAL },
   { path: 'user/professional-profile/payment/:username', children: PAYMENT },
+  { path: 'user/register/professional-profile/:username', children: REGISTER_PROFESSIONAL },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];
