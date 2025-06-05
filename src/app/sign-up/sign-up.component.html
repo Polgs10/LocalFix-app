@@ -279,19 +279,17 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 [class.border-red-500]="registerForm.get('provincia')?.invalid && registerForm.get('provincia')?.touched"
                             >
-                                <option value="" disabled selected>Selecciona una provincia</option>
                                 <option value="">Selecciona provincia</option>
-                                <option value="madrid">Madrid</option>
-                                <option value="barcelona">Barcelona</option>
-                                <option value="valencia">Valencia</option>
-                                <option value="sevilla">Sevilla</option>
-                                <option value="zaragoza">Zaragoza</option>
-                                <option value="malaga">Málaga</option>
-                                <option value="murcia">Murcia</option>
-                                <option value="palmas">Las Palmas</option>
-                                <option value="bilbao">Vizcaya</option>
-                                <option value="alicante">Alicante</option>
-                                <option value="granada">Granada</option>
+                                <option value="Madrid">Madrid</option>
+                                <option value="Barcelona">Barcelona</option>
+                                <option value="Valencia">Valencia</option>
+                                <option value="Sevilla">Sevilla</option>
+                                <option value="Zaragoza">Zaragoza</option>
+                                <option value="Málaga">Málaga</option>
+                                <option value="Murcia">Murcia</option>
+                                <option value="Vizcaya">Vizcaya</option>
+                                <option value="Alicante">Alicante</option>
+                                <option value="Granada">Granada</option>
                                 <!-- Resto de provincias... -->
                             </select>
                             <div *ngIf="registerForm.get('provincia')?.invalid && registerForm.get('provincia')?.touched" class="text-red-500 text-xs mt-1">

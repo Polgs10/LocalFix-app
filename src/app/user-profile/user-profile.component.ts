@@ -24,6 +24,10 @@ export class UserProfileComponent {
   userProfileLocation: UserProfileLocation | null = null;
   userProfileRatings: UserProfileRating[] | null = null;
 
+  currentPassword: string = '';
+  newPassword: string = '';
+  confirmPassword: string = '';
+
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
@@ -39,6 +43,51 @@ export class UserProfileComponent {
       }
     });
 
+  }
+
+  handleProfileUpdate() {
+    if (!this.userProfile || !this.userProfileLocation || !this.userProfileId) {
+      return;
+    }
+
+    if (this.newPassword && this.newPassword !== this.confirmPassword) {
+      alert('Las contraseñas nuevas no coinciden');
+      return;
+    }
+
+    const updateData = {
+      name: this.userProfile.name,
+      firstName: this.userProfile.firstName,
+      lastName: this.userProfile.lastName,
+      email: this.userProfile.email,
+      phone: this.userProfile.phone,
+      address: this.userProfileLocation.address,
+      city: this.userProfileLocation.city,
+      province: this.userProfileLocation.province,
+      postalCode: this.userProfileLocation.postalCode,
+      country: this.userProfileLocation.country,
+      password: this.newPassword
+    };
+
+    this.http.put<boolean>(
+      `http://localhost:8080/api/users/update/${this.userProfileId}`,
+      updateData
+    ).subscribe({
+      next: (success) => {
+        if (success) {
+          alert('Perfil actualizado correctamente');
+          this.isEditMode = false;
+          this.loadUserProfileDetails();
+          this.loadUserProfileLocation();
+        } else {
+          alert('Error al actualizar el perfil');
+        }
+      },
+      error: (err) => {
+        console.error('Error updating profile', err);
+        alert('Error al actualizar el perfil');
+      }
+    });
   }
 
   loadUserId(username: string): void {
@@ -125,12 +174,6 @@ export class UserProfileComponent {
       };
       reader.readAsDataURL(file);
     }
-  }
-
-  handleProfileUpdate() {
-    alert('Perfil actualizado correctamente');
-
-    this.isEditMode = false;
   }
 
   goBack() {
