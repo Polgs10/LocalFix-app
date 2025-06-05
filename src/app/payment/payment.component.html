@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Mensual - Suscripción</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="#" class="text-gray-600 hover:text-blue-600 mr-4" onclick="goBack()">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-800">Pago de Suscripción</h1>
+                </div>
+                <div class="text-2xl font-bold text-blue-600">MiProducto</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Formulario de Pago -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Información de Pago</h2>
+
+                    <form id="payment-form" onsubmit="handlePayment(event)">
+                        <!-- Método de Pago -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-4">Método de Pago</label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Tarjeta de Débito -->
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="payment-method" value="debit" checked class="sr-only" onchange="updatePaymentMethod('debit')">
+                                    <div id="debit-card" class="border-2 border-blue-500 bg-blue-50 rounded-lg p-4 hover:border-blue-600 transition duration-200">
+                                        <div class="flex flex-col items-center text-center">
+                                            <i class="fas fa-credit-card text-3xl text-blue-600 mb-2"></i>
+                                            <span class="font-medium text-gray-800">Tarjeta de Débito</span>
+                                            <span class="text-sm text-gray-500">Visa, Mastercard</span>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <!-- Tarjeta de Crédito -->
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="payment-method" value="credit" class="sr-only" onchange="updatePaymentMethod('credit')">
+                                    <div id="credit-card" class="border-2 border-gray-300 rounded-lg p-4 hover:border-blue-500 transition duration-200">
+                                        <div class="flex flex-col items-center text-center">
+                                            <i class="fas fa-credit-card text-3xl text-gray-600 mb-2"></i>
+                                            <span class="font-medium text-gray-800">Tarjeta de Crédito</span>
+                                            <span class="text-sm text-gray-500">Visa, Mastercard</span>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <!-- PayPal -->
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="payment-method" value="paypal" class="sr-only" onchange="updatePaymentMethod('paypal')">
+                                    <div id="paypal-card" class="border-2 border-gray-300 rounded-lg p-4 hover:border-blue-500 transition duration-200">
+                                        <div class="flex flex-col items-center text-center">
+                                            <i class="fab fa-paypal text-3xl text-blue-600 mb-2"></i>
+                                            <span class="font-medium text-gray-800">PayPal</span>
+                                            <span class="text-sm text-gray-500">Pago seguro</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Detalles de Tarjeta -->
+                        <div id="card-details" class="mb-6">
+                            <h3 class="text-lg font-medium text-gray-800 mb-4">Detalles de la Tarjeta</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Número de Tarjeta -->
+                                <div class="md:col-span-2">
+                                    <label for="card-number" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Número de Tarjeta
+                                    </label>
+                                    <div class="relative">
+                                        <input
+                                            id="card-number"
+                                            name="card-number"
+                                            type="text"
+                                            placeholder="1234 5678 9012 3456"
+                                            maxlength="19"
+                                            required
+                                            class="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            oninput="formatCardNumber(this)"
+                                        >
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                            <i id="card-icon" class="fas fa-credit-card text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Nombre del Titular -->
+                                <div class="md:col-span-2">
+                                    <label for="cardholder-name" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Nombre del Titular
+                                    </label>
+                                    <input
+                                        id="cardholder-name"
+                                        name="cardholder-name"
+                                        type="text"
+                                        placeholder="Juan Pérez García"
+                                        required
+                                        class="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                </div>
+
+                                <!-- Fecha de Expiración -->
+                                <div>
+                                    <label for="expiry-date" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Fecha de Expiración
+                                    </label>
+                                    <input
+                                        id="expiry-date"
+                                        name="expiry-date"
+                                        type="text"
+                                        placeholder="MM/AA"
+                                        maxlength="5"
+                                        required
+                                        class="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        oninput="formatExpiryDate(this)"
+                                    >
+                                </div>
+
+                                <!-- CVV -->
+                                <div>
+                                    <label for="cvv" class="block text-sm font-medium text-gray-700 mb-2">
+                                        CVV
+                                    </label>
+                                    <div class="relative">
+                                        <input
+                                            id="cvv"
+                                            name="cvv"
+                                            type="text"
+                                            placeholder="123"
+                                            maxlength="4"
+                                            required
+                                            class="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                            <i class="fas fa-question-circle text-gray-400 cursor-help" title="Código de 3 dígitos en el reverso de la tarjeta"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PayPal Section (Hidden by default) -->
+                        <div id="paypal-details" class="mb-6 hidden">
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <i class="fab fa-paypal text-blue-600 text-2xl mr-3"></i>
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">Pagar con PayPal</h3>
+                                        <p class="text-sm text-gray-600">Serás redirigido a PayPal para completar el pago de forma segura.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Código de Descuento -->
+                        <div class="mb-6">
+                            <label for="discount-code" class="block text-sm font-medium text-gray-700 mb-2">
+                                Código de Descuento (Opcional)
+                            </label>
+                            <div class="flex">
+                                <input
+                                    id="discount-code"
+                                    name="discount-code"
+                                    type="text"
+                                    placeholder="Introduce tu código"
+                                    class="flex-1 px-3 py-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                <button
+                                    type="button"
+                                    onclick="applyDiscount()"
+                                    class="px-4 py-3 bg-gray-600 text-white rounded-r-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200"
+                                >
+                                    Aplicar
+                                </button>
+                            </div>
+                            <div id="discount-message" class="mt-2 text-sm hidden"></div>
+                        </div>
+
+                        <!-- Términos y Condiciones -->
+                        <div class="mb-6">
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    <input
+                                        id="terms"
+                                        name="terms"
+                                        type="checkbox"
+                                        required
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    >
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="terms" class="font-medium text-gray-700">
+                                        Acepto los <a href="#" class="text-blue-600 hover:text-blue-500 underline">términos y condiciones</a>
+                                        y la <a href="#" class="text-blue-600 hover:text-blue-500 underline">política de privacidad</a>
+                                    </label>
+                                    <p class="text-gray-500 mt-1">
+                                        La suscripción se renovará automáticamente cada mes. Puedes cancelar en cualquier momento desde tu cuenta.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button
+                                type="submit"
+                                class="flex-1 bg-blue-600 text-white py-4 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 font-semibold text-lg"
+                            >
+                                <i class="fas fa-lock mr-2"></i>
+                                <span id="pay-button-text">Pagar 5,00€</span>
+                            </button>
+                            <button
+                                type="button"
+                                onclick="cancelPayment()"
+                                class="flex-1 bg-gray-300 text-gray-700 py-4 px-6 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200 font-semibold text-lg"
+                            >
+                                <i class="fas fa-times mr-2"></i>
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Resumen del Pedido -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-lg p-6 sticky top-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">Resumen del Pedido</h3>
+
+                    <!-- Plan Seleccionado -->
+                    <div class="border-b border-gray-200 pb-4 mb-4">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-crown text-yellow-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Plan Premium</h4>
+                                <p class="text-sm text-gray-500">Suscripción mensual</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    Acceso completo a la plataforma
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    Soporte prioritario
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    Funciones avanzadas
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    Sin anuncios
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Desglose de Precios -->
+                    <div class="space-y-3 mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="font-medium" id="subtotal">5,00€</span>
+                        </div>
+                        <div class="flex justify-between" id="discount-row" style="display: none;">
+                            <span class="text-green-600">Descuento</span>
+                            <span class="font-medium text-green-600" id="discount-amount">-0,00€</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">IVA (21%)</span>
+                            <span class="font-medium" id="tax-amount">1,05€</span>
+                        </div>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-semibold text-gray-800">Total</span>
+                            <span class="text-2xl font-bold text-blue-600" id="total-amount">6,05€</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Se cobrará mensualmente</p>
+                    </div>
+
+                    <!-- Información de Seguridad -->
+                    <div class="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                            <div>
+                                <h4 class="font-medium text-green-800">Pago Seguro</h4>
+                                <p class="text-sm text-green-600">Tus datos están protegidos con cifrado SSL</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Garantía -->
+                    <div class="mt-4 text-center">
+                        <p class="text-sm text-gray-500">
+                            <i class="fas fa-undo text-gray-400 mr-1"></i>
+                            Garantía de devolución de 30 días
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentDiscount = 0;
+        let basePrice = 5.00;
+        let taxRate = 0.21;
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function updatePaymentMethod(method) {
+            // Reset all cards
+            document.getElementById('debit-card').className = 'border-2 border-gray-300 rounded-lg p-4 hover:border-blue-500 transition duration-200';
+            document.getElementById('credit-card').className = 'border-2 border-gray-300 rounded-lg p-4 hover:border-blue-500 transition duration-200';
+            document.getElementById('paypal-card').className = 'border-2 border-gray-300 rounded-lg p-4 hover:border-blue-500 transition duration-200';
+
+            // Hide all details
+            document.getElementById('card-details').style.display = 'block';
+            document.getElementById('paypal-details').style.display = 'none';
+
+            // Update selected card
+            if (method === 'debit') {
+                document.getElementById('debit-card').className = 'border-2 border-blue-500 bg-blue-50 rounded-lg p-4 hover:border-blue-600 transition duration-200';
+            } else if (method === 'credit') {
+                document.getElementById('credit-card').className = 'border-2 border-blue-500 bg-blue-50 rounded-lg p-4 hover:border-blue-600 transition duration-200';
+            } else if (method === 'paypal') {
+                document.getElementById('paypal-card').className = 'border-2 border-blue-500 bg-blue-50 rounded-lg p-4 hover:border-blue-600 transition duration-200';
+                document.getElementById('card-details').style.display = 'none';
+                document.getElementById('paypal-details').style.display = 'block';
+            }
+        }
+
+        function formatCardNumber(input) {
+            let value = input.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            input.value = formattedValue;
+
+            // Update card icon based on number
+            const cardIcon = document.getElementById('card-icon');
+            if (value.startsWith('4')) {
+                cardIcon.className = 'fab fa-cc-visa text-blue-600';
+            } else if (value.startsWith('5')) {
+                cardIcon.className = 'fab fa-cc-mastercard text-red-600';
+            } else {
+                cardIcon.className = 'fas fa-credit-card text-gray-400';
+            }
+        }
+
+        function formatExpiryDate(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            input.value = value;
+        }
+
+        function applyDiscount() {
+            const discountCode = document.getElementById('discount-code').value.trim().toUpperCase();
+            const discountMessage = document.getElementById('discount-message');
+            const discountRow = document.getElementById('discount-row');
+            const discountAmount = document.getElementById('discount-amount');
+
+            // Códigos de descuento válidos
+            const validCodes = {
+                'WELCOME10': 10,
+                'SAVE20': 20,
+                'STUDENT15': 15,
+                'FIRST5': 5
+            };
+
+            if (validCodes[discountCode]) {
+                currentDiscount = validCodes[discountCode];
+                discountMessage.textContent = `¡Código aplicado! Descuento del ${currentDiscount}%`;
+                discountMessage.className = 'mt-2 text-sm text-green-600';
+                discountMessage.classList.remove('hidden');
+                discountRow.style.display = 'flex';
+
+                const discountValue = (basePrice * currentDiscount) / 100;
+                discountAmount.textContent = `-${discountValue.toFixed(2)}€`;
+
+                updateTotals();
+            } else if (discountCode === '') {
+                discountMessage.textContent = 'Por favor, introduce un código de descuento';
+                discountMessage.className = 'mt-2 text-sm text-gray-500';
+                discountMessage.classList.remove('hidden');
+            } else {
+                discountMessage.textContent = 'Código de descuento no válido';
+                discountMessage.className = 'mt-2 text-sm text-red-600';
+                discountMessage.classList.remove('hidden');
+                currentDiscount = 0;
+                discountRow.style.display = 'none';
+                updateTotals();
+            }
+        }
+
+        function updateTotals() {
+            const discountValue = (basePrice * currentDiscount) / 100;
+            const subtotalAfterDiscount = basePrice - discountValue;
+            const taxAmount = subtotalAfterDiscount * taxRate;
+            const total = subtotalAfterDiscount + taxAmount;
+
+            document.getElementById('subtotal').textContent = `${basePrice.toFixed(2)}€`;
+            document.getElementById('tax-amount').textContent = `${taxAmount.toFixed(2)}€`;
+            document.getElementById('total-amount').textContent = `${total.toFixed(2)}€`;
+            document.getElementById('pay-button-text').textContent = `Pagar ${total.toFixed(2)}€`;
+        }
+
+        function handlePayment(event) {
+            event.preventDefault();
+
+            const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Procesando Pago...';
+            submitBtn.disabled = true;
+
+            // Simular procesamiento de pago
+            setTimeout(() => {
+                if (paymentMethod === 'paypal') {
+                    alert('Redirigiendo a PayPal...');
+                    // Aquí redirigirías a PayPal
+                } else {
+                    alert('¡Pago procesado correctamente! Tu suscripción está activa.');
+                }
+
+                // Aquí redirigirías a la página de confirmación
+                // window.location.href = '/confirmacion-pago';
+
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 3000);
+        }
+
+        function cancelPayment() {
+            if (confirm('¿Estás seguro de que deseas cancelar el pago?')) {
+                window.history.back();
+            }
+        }
+
+        // Inicializar totales
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTotals();
+        });
+    </script>
+</body>
+</html>

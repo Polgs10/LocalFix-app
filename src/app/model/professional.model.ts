@@ -7,7 +7,7 @@ export interface ProfessionalDetails {
   averageRating: number;
   ratingCount: number;
   imageUrl?: string;
-  payment: boolean;
+  active: boolean;
 }
 
 export interface ProfessionalCard {

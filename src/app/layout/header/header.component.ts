@@ -31,7 +31,6 @@ export class HeaderComponent {
   }
 
   logout(): void {
-    // Lógica para cerrar sesión
     this.router.navigate(['/login']);
   }
 }

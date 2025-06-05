@@ -14,15 +14,18 @@ import { FormsModule } from '@angular/forms';
 export class UserProfileProfessionalComponent {
   professionalId: number | null = null;
   professional: ProfessionalDetails | null = null;
-  professionalLocations: ProfessionalLocation[] | null = null;
-  professionalServices: ProfessionalService[] | null = null;
-  professionalRatings: ProfessionalRating[] | null = null;
+  professionalLocations: ProfessionalLocation[] = [];
+  professionalServices: ProfessionalService[] = [];
+  professionalRatings: ProfessionalRating[] = [];
   isLoading = true;
   error: string | null = null;
   selectedRating = 0;
   showReviewModal = false;
   newReviewComment = '';
   username: string | null = null;
+  guilds: string[] = [];
+  isEditMode = false;
+  originalProfessional: ProfessionalDetails | null = null;
 
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
 
@@ -31,16 +34,8 @@ export class UserProfileProfessionalComponent {
       const username = params.get('username');
       if (username) {
         this.username = username;
-      } else {
-        this.error = 'Professional not found';
-        this.isLoading = false;
-      }
-    });
-
-    this.route.paramMap.subscribe(params => {
-      const businessName = params.get('businessName');
-      if (businessName) {
-        this.loadProfessionalId(businessName);
+        this.isProfessional(username);
+        this.loadGuilds();
       } else {
         this.error = 'Professional not found';
         this.isLoading = false;
@@ -48,8 +43,60 @@ export class UserProfileProfessionalComponent {
     });
   }
 
-  loadProfessionalId(businessName: string): void {
-    this.http.get<number>(`http://localhost:8080/api/professionals/${businessName}/id`)
+  getStars(rating: number): string[] {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push('fas fa-star');
+    }
+
+    if (hasHalfStar) {
+      stars.push('fas fa-star-half-alt');
+    }
+
+    const emptyStars = 5 - stars.length;
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push('far fa-star');
+    }
+
+    return stars;
+  }
+
+  viewPayment(username: string): void {
+    this.router.navigate([`user/professional-profile/payment/${username}`]);
+  }
+
+  isProfessional(username: string): void {
+    this.http.get<boolean>(`http://localhost:8080/api/users/professional/${username}`)
+      .subscribe({
+        next: (isProfessional) => {
+          if (isProfessional) {
+            this.loadProfessionalId(username);
+          } else {
+            if (this.username) {
+              this.viewPayment(this.username);
+            }
+          }
+        },
+        error: (err) => {
+          this.error = 'Professional not found';
+          this.isLoading = false;
+          console.error(err);
+        }
+      });
+  }
+
+  loadGuilds(): void {
+    this.http.get<string[]>('http://localhost:8080/api/guilds/categories').subscribe({
+      next: (data) => this.guilds = data,
+      error: (err) => console.error('Error loading categories', err)
+    });
+  }
+
+  loadProfessionalId(username: string): void {
+    this.http.get<number>(`http://localhost:8080/api/users/professional/id/${username}`)
       .subscribe({
         next: (id) => {
           this.professionalId = id;
@@ -73,6 +120,7 @@ export class UserProfileProfessionalComponent {
       .subscribe({
         next: (data) => {
           this.professional = data;
+          this.originalProfessional = {...data};
         },
         error: (err) => {
           console.error('Error loading professional details', err);
@@ -87,7 +135,6 @@ export class UserProfileProfessionalComponent {
       .subscribe({
         next: (data) => {
           this.professionalLocations = data;
-          console.log('Locations loaded:', data);
         },
         error: (err) => {
           console.error('Error loading locations', err);
@@ -124,108 +171,147 @@ export class UserProfileProfessionalComponent {
       });
   }
 
-  goBack(): void {
-    this.router.navigate(['/layout', this.username]);
-  }
-
-  getPrimaryLocation(): ProfessionalLocation | undefined {
-    if (!this.professionalLocations || this.professionalLocations.length === 0) return undefined;
-    return this.professionalLocations.find(loc => !loc.primary) || this.professionalLocations[0];
-  }
-
-  getSecondaryLocations(): ProfessionalLocation[] {
-    if (!this.professionalLocations || this.professionalLocations.length <= 1) return [];
-    const primaryId = this.getPrimaryLocation()?.id;
-    return this.professionalLocations.filter(loc => loc.primary && loc.id !== primaryId);
-  }
-
-  formatBusinessHours(hours: string | undefined): string {
-    if (!hours) return '';
-    return hours.replace(/\n/g, '<br>');
-  }
-
-  getRatingStars(score: number): number[] {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      if (score >= i) {
-        stars.push(2); // estrella llena
-      } else if (score >= i - 0.5) {
-        stars.push(1); // media estrella
-      } else {
-        stars.push(0); // estrella vacía
-      }
-    }
-    return stars;
-  }
-
-  getRatingDistribution(): {stars: number, count: number, percentage: number}[] {
-    if (!this.professionalRatings || !this.professional) return [];
-
-    const distribution = [5, 4, 3, 2, 1].map(stars => {
-      const count = this.professionalRatings!.filter(r => Math.round(r.score) === stars).length;
-      const percentage = (count / this.professional!.ratingCount) * 100;
-      return {stars, count, percentage};
-    });
-
-    return distribution;
-  }
-
-  formatDuration(minutes: number | undefined): string {
-    if (!minutes) return 'No especificado';
-
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-
-    if (hours > 0 && mins > 0) {
-      return `${hours}h ${mins}m`;
-    } else if (hours > 0) {
-      return `${hours}h`;
-    } else {
-      return `${mins}m`;
+  toggleEditMode(): void {
+    this.isEditMode = !this.isEditMode;
+    if (!this.isEditMode && this.originalProfessional && this.professional) {
+      this.professional = {...this.originalProfessional};
     }
   }
 
-  getWhatsAppNumber(phone: string | undefined): string {
-    if (!phone) return '';
-    // Eliminar espacios y caracteres no numéricos
-    return phone.replace(/[^\d]/g, '');
+  cancelProfileEdit(): void {
+    this.isEditMode = false;
+    if (this.originalProfessional && this.professional) {
+      this.professional = {...this.originalProfessional};
+    }
   }
 
-  closeReviewModal() {
-    this.showReviewModal = false;
-    this.selectedRating = 0;
-    this.newReviewComment = '';
-  }
+  handleProfileUpdate(event: Event): void {
+    event.preventDefault();
+    if (!this.professionalId || !this.professional) return;
 
-  submitReview(): void {
-    if (!this.professionalId || this.selectedRating === 0) return;
-
-    const newRating: Omit<ProfessionalRating, 'id' | 'date'> = {
-      username: 'Usuario Anónimo', // You might want to use the actual user name
-      score: this.selectedRating,
-      comment: this.newReviewComment
-    };
-
-    this.http.post(`http://localhost:8080/api/ratings/${this.professionalId}`, newRating)
+    this.http.put(`http://localhost:8080/api/professionals/${this.professionalId}/details`, this.professional)
       .subscribe({
         next: () => {
-          this.loadProfessionalRatings();
-          if (this.professional) {
-            this.professional.ratingCount += 1;
-            // Recalculate average rating - you might want to get this from the server instead
-            const total = this.professionalRatings?.reduce((sum, rating) => sum + rating.score, 0) || 0;
-            this.professional.averageRating = (total + this.selectedRating) / (this.professional.ratingCount);
-          }
-          this.closeReviewModal();
+          this.originalProfessional = {...this.professional!};
+          this.isEditMode = false;
+          alert('Perfil actualizado correctamente');
         },
         error: (err) => {
-          console.error('Error submitting review', err);
-          // Handle error appropriately
+          console.error('Error updating professional details', err);
+          alert('Error al actualizar el perfil');
         }
       });
   }
 
-  setRating(rating: number): void {
-    this.selectedRating = rating;
+  toggleProfileStatus(): void {
+    if (!this.professional) return;
+
+    this.professional.active = !this.professional.active;
+    this.http.put(`http://localhost:8080/api/professionals/${this.professionalId}/status`, { active: this.professional.active })
+      .subscribe({
+        next: () => {
+          if (this.professional) {
+            this.originalProfessional = {...this.professional};
+          }
+        },
+        error: (err) => {
+          console.error('Error updating professional status', err);
+          if (this.professional && this.originalProfessional) {
+            this.professional.active = this.originalProfessional.active;
+          }
+        }
+      });
+  }
+
+  handleBusinessImageUpload(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || !input.files[0] || !this.professionalId) return;
+
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('image', file);
+
+    this.http.post(`http://localhost:8080/api/professionals/${this.professionalId}/image`, formData)
+      .subscribe({
+        next: (response: any) => {
+          if (this.professional) {
+            this.professional.imageUrl = response.imageUrl;
+            this.originalProfessional = {...this.professional};
+          }
+        },
+        error: (err) => {
+          console.error('Error uploading image', err);
+        }
+      });
+  }
+
+  showLocationModal(locationId?: number): void {
+    // Implementar lógica para mostrar modal de ubicación
+    if (locationId) {
+      alert(`Editar ubicación ${locationId}`);
+    } else {
+      alert('Añadir nueva ubicación');
+    }
+  }
+
+  setPrimaryLocation(locationId: number): void {
+    this.http.put(`http://localhost:8080/api/professional-locations/${locationId}/primary`, {})
+      .subscribe({
+        next: () => {
+          this.professionalLocations = this.professionalLocations.map(loc => ({
+            ...loc,
+            primary: loc.id === locationId
+          }));
+        },
+        error: (err) => {
+          console.error('Error setting primary location', err);
+        }
+      });
+  }
+
+  editLocation(locationId: number): void {
+    this.showLocationModal(locationId);
+  }
+
+  deleteLocation(locationId: number): void {
+    if (confirm('¿Estás seguro de que deseas eliminar esta ubicación?')) {
+      this.http.delete(`http://localhost:8080/api/professional-locations/${locationId}`)
+        .subscribe({
+          next: () => {
+            this.professionalLocations = this.professionalLocations.filter(loc => loc.id !== locationId);
+          },
+          error: (err) => {
+            console.error('Error deleting location', err);
+          }
+        });
+    }
+  }
+
+  addService(): void {
+    // Implementar lógica para añadir servicio
+    alert('Añadir nuevo servicio');
+  }
+
+  editService(service: ProfessionalService): void {
+    // Implementar lógica para editar servicio
+    alert(`Editar servicio: ${service.name}`);
+  }
+
+  deleteService(service: ProfessionalService): void {
+    if (confirm(`¿Estás seguro de que deseas eliminar el servicio "${service.name}"?`)) {
+      this.http.delete(`http://localhost:8080/api/services/${this.professionalId}/${service.name}`)
+        .subscribe({
+          next: () => {
+            this.professionalServices = this.professionalServices.filter(s => s.name !== service.name);
+          },
+          error: (err) => {
+            console.error('Error deleting service', err);
+          }
+        });
+    }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/']);
   }
 }

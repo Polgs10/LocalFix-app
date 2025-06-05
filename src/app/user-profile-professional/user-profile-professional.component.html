@@ -13,7 +13,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <a href="#" class="text-gray-600 hover:text-blue-600 mr-4" onclick="goBack()">
+                    <a href="#" class="text-gray-600 hover:text-blue-600 mr-4" (click)="goBack()">
                         <i class="fas fa-arrow-left text-lg"></i>
                     </a>
                     <h1 class="text-xl font-semibold text-gray-800">Mi Perfil Profesional</h1>
@@ -23,10 +23,12 @@
                     <div class="flex items-center">
                         <span class="text-sm text-gray-600 mr-2">Perfil:</span>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input id="profile-active" type="checkbox" class="sr-only peer" checked onchange="toggleProfileStatus()">
+                            <input id="profile-active" type="checkbox" class="sr-only peer" [checked]="professional?.active" (change)="toggleProfileStatus()">
                             <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
                         </label>
-                        <span id="status-text" class="text-sm font-medium text-green-600 ml-2">Activo</span>
+                        <span id="status-text" class="text-sm font-medium ml-2" [class.text-green-600]="professional?.active" [class.text-red-600]="!professional?.active">
+                            {{professional?.active ? 'Activo' : 'Inactivo'}}
+                        </span>
                     </div>
                     <div class="text-2xl font-bold text-blue-600">MiProducto</div>
                 </div>
@@ -37,10 +39,12 @@
     <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Estado del perfil -->
-        <div id="profile-status-banner" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6">
+        <div id="profile-status-banner" class="px-4 py-3 rounded relative mb-6"
+             [class.bg-green-100]="professional?.active" [class.border-green-400]="professional?.active" [class.text-green-700]="professional?.active"
+             [class.bg-red-100]="!professional?.active" [class.border-red-400]="!professional?.active" [class.text-red-700]="!professional?.active">
             <div class="flex items-center">
-                <i class="fas fa-check-circle mr-2"></i>
-                <span>Tu perfil profesional está activo y visible para los clientes</span>
+                <i class="fas mr-2" [class.fa-check-circle]="professional?.active" [class.fa-times-circle]="!professional?.active"></i>
+                <span>{{professional?.active ? 'Tu perfil profesional está activo y visible para los clientes' : 'Tu perfil profesional está desactivado y no es visible para los clientes'}}</span>
             </div>
         </div>
 
@@ -53,14 +57,14 @@
                     <div class="relative">
                         <img
                             id="business-image"
-                            src="https://via.placeholder.com/120x120"
+                            [src]="professional?.imageUrl || 'https://via.placeholder.com/120x120'"
                             alt="Logo del negocio"
                             class="w-24 h-24 rounded-full border-4 border-white object-cover"
                         >
                         <button
                             id="change-business-photo-btn"
                             class="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 hidden"
-                            onclick="document.getElementById('business-file-input').click()"
+
                         >
                             <i class="fas fa-camera text-gray-600 text-sm"></i>
                         </button>
@@ -69,7 +73,7 @@
                             type="file"
                             accept="image/*"
                             class="hidden"
-                            onchange="handleBusinessImageUpload(event)"
+                            (change)="handleBusinessImageUpload($event)"
                         >
                     </div>
 
@@ -77,27 +81,22 @@
                     <div class="text-white flex-1">
                         <div class="flex items-center mb-2">
                             <span id="display-guild" class="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-sm font-medium mr-3">
-                                Electricista
+                                {{professional?.guild}}
                             </span>
                             <div class="flex items-center">
                                 <div class="flex text-yellow-300">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
+                                    <i *ngFor="let star of getStars(professional?.averageRating || 0)" [class]="star"></i>
                                 </div>
-                                <span class="ml-2 text-blue-100">4.5 (23 valoraciones)</span>
+                                <span class="ml-2 text-blue-100">{{professional?.averageRating?.toFixed(1) || '0.0'}} ({{professional?.ratingCount || 0}} valoraciones)</span>
                             </div>
                         </div>
-                        <h2 id="display-business-name" class="text-3xl font-bold mb-2">Electricidad García S.L.</h2>
+                        <h2 id="display-business-name" class="text-3xl font-bold mb-2">{{professional?.businessName}}</h2>
                         <p class="text-blue-100 text-lg mb-2">
                             <i class="fas fa-briefcase mr-2"></i>
-                            <span id="display-experience">15</span> años de experiencia
+                            <span id="display-experience">{{professional?.experience}}</span> años de experiencia
                         </p>
                         <p id="display-description" class="text-blue-100">
-                            Especialistas en instalaciones eléctricas residenciales y comerciales.
-                            Ofrecemos servicios de calidad con garantía y atención personalizada.
+                            {{professional?.description}}
                         </p>
                     </div>
 
@@ -105,7 +104,7 @@
                     <div class="flex-shrink-0">
                         <button
                             id="edit-profile-btn"
-                            onclick="toggleEditMode()"
+                            (click)="toggleEditMode()"
                             class="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-500 transition duration-200 font-medium"
                         >
                             <i class="fas fa-edit mr-2"></i>
@@ -116,8 +115,8 @@
             </div>
 
             <!-- Formulario de perfil profesional -->
-            <div class="p-6">
-                <form id="professional-form" onsubmit="handleProfileUpdate(event)">
+            <div class="p-6" *ngIf="professional">
+                <form id="professional-form" (submit)="handleProfileUpdate($event)">
                     <!-- Información del negocio -->
                     <div class="border-b border-gray-200 pb-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Información del Negocio</h3>
@@ -131,9 +130,11 @@
                                     id="business-name"
                                     name="business-name"
                                     type="text"
-                                    value="Electricidad García S.L."
-                                    readonly
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
+                                    [(ngModel)]="professional.businessName"
+                                    [readonly]="!isEditMode"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    [class.bg-gray-100]="!isEditMode" [class.text-gray-500]="!isEditMode" [class.cursor-not-allowed]="!isEditMode"
+                                    [class.bg-white]="isEditMode" [class.text-gray-900]="isEditMode"
                                 >
                             </div>
 
@@ -145,14 +146,13 @@
                                 <select
                                     id="guild"
                                     name="guild"
-                                    disabled
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
+                                    [(ngModel)]="professional.guild"
+                                    [disabled]="!isEditMode"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    [class.bg-gray-100]="!isEditMode" [class.text-gray-500]="!isEditMode" [class.cursor-not-allowed]="!isEditMode"
+                                    [class.bg-white]="isEditMode" [class.text-gray-900]="isEditMode"
                                 >
-                                    <option value="electricista" selected>Electricista</option>
-                                    <option value="fontanero">Fontanero</option>
-                                    <option value="pintor">Pintor</option>
-                                    <option value="carpintero">Carpintero</option>
-                                    <option value="cerrajero">Cerrajero</option>
+                                    <option *ngFor="let guild of guilds" [value]="guild">{{guild}}</option>
                                 </select>
                             </div>
 
@@ -165,9 +165,11 @@
                                     id="experience"
                                     name="experience"
                                     type="number"
-                                    value="15"
-                                    readonly
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
+                                    [(ngModel)]="professional.experience"
+                                    [readonly]="!isEditMode"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    [class.bg-gray-100]="!isEditMode" [class.text-gray-500]="!isEditMode" [class.cursor-not-allowed]="!isEditMode"
+                                    [class.bg-white]="isEditMode" [class.text-gray-900]="isEditMode"
                                 >
                             </div>
 
@@ -180,15 +182,18 @@
                                     id="description"
                                     name="description"
                                     rows="4"
-                                    readonly
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
-                                >Especialistas en instalaciones eléctricas residenciales y comerciales. Ofrecemos servicios de calidad con garantía y atención personalizada.</textarea>
+                                    [(ngModel)]="professional.description"
+                                    [readonly]="!isEditMode"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    [class.bg-gray-100]="!isEditMode" [class.text-gray-500]="!isEditMode" [class.cursor-not-allowed]="!isEditMode"
+                                    [class.bg-white]="isEditMode" [class.text-gray-900]="isEditMode"
+                                ></textarea>
                             </div>
                         </div>
                     </div>
 
                     <!-- Botones de acción (ocultos por defecto) -->
-                    <div id="profile-action-buttons" class="flex flex-col sm:flex-row gap-4 pt-6 hidden">
+                    <div id="profile-action-buttons" class="flex flex-col sm:flex-row gap-4 pt-6" [class.hidden]="!isEditMode">
                         <button
                             type="submit"
                             class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
@@ -198,7 +203,7 @@
                         </button>
                         <button
                             type="button"
-                            onclick="cancelProfileEdit()"
+                            (click)="cancelProfileEdit()"
                             class="flex-1 bg-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200"
                         >
                             <i class="fas fa-times mr-2"></i>
@@ -215,7 +220,7 @@
                 <h3 class="text-2xl font-semibold text-gray-800">Ubicaciones</h3>
                 <button
                     id="add-location-btn"
-                    onclick="showLocationModal()"
+                    (click)="showLocationModal()"
                     class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
                 >
                     <i class="fas fa-plus mr-2"></i>
@@ -224,21 +229,21 @@
             </div>
 
             <div id="locations-container" class="space-y-6">
-                <!-- Ubicación 1 -->
-                <div class="border border-gray-200 rounded-lg p-4" data-location-id="1">
+                <!-- Ubicación -->
+                <div class="border border-gray-200 rounded-lg p-4" *ngFor="let location of professionalLocations" [attr.data-location-id]="location.id">
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex items-center">
                             <label class="inline-flex items-center mr-3">
-                                <input type="radio" name="primary-location" value="1" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500" onchange="setPrimaryLocation(1)">
-                                <span class="ml-2 text-lg font-semibold text-gray-800">Ubicación 1</span>
+                                <input type="radio" name="primary-location" [value]="location.id" [checked]="location.primary" (change)="setPrimaryLocation(location.id)" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-lg font-semibold text-gray-800">Ubicación {{location.id}}</span>
                             </label>
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Principal</span>
+                            <span *ngIf="location.primary" class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Principal</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <button class="text-blue-600 hover:text-blue-800" onclick="editLocation(1)">
+                            <button class="text-blue-600 hover:text-blue-800" (click)="editLocation(location.id)">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="text-red-600 hover:text-red-800" onclick="deleteLocation(1)">
+                            <button class="text-red-600 hover:text-red-800" (click)="deleteLocation(location.id)">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
@@ -246,81 +251,31 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                         <div>
                             <span class="font-medium text-gray-700">Dirección:</span>
-                            <p class="text-gray-600">Calle Mayor 123, 4º B</p>
+                            <p class="text-gray-600">{{location.address}}</p>
                         </div>
                         <div>
                             <span class="font-medium text-gray-700">Ciudad:</span>
-                            <p class="text-gray-600">Madrid</p>
+                            <p class="text-gray-600">{{location.city}}</p>
                         </div>
                         <div>
                             <span class="font-medium text-gray-700">Provincia:</span>
-                            <p class="text-gray-600">Madrid</p>
+                            <p class="text-gray-600">{{location.province}}</p>
                         </div>
                         <div>
                             <span class="font-medium text-gray-700">Código Postal:</span>
-                            <p class="text-gray-600">28001</p>
+                            <p class="text-gray-600">{{location.postalCode}}</p>
                         </div>
                         <div>
                             <span class="font-medium text-gray-700">Teléfono Fijo:</span>
-                            <p class="text-gray-600">91 123 45 67</p>
+                            <p class="text-gray-600">{{location.landlinePhone}}</p>
                         </div>
                         <div>
                             <span class="font-medium text-gray-700">Móvil:</span>
-                            <p class="text-gray-600">123 456 789</p>
+                            <p class="text-gray-600">{{location.mobilePhone}}</p>
                         </div>
                         <div class="md:col-span-2 lg:col-span-3">
                             <span class="font-medium text-gray-700">Horario:</span>
-                            <p class="text-gray-600">Lunes-Viernes: 8:00-18:00, Sábados: 9:00-14:00</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ubicación 2 -->
-                <div class="border border-gray-200 rounded-lg p-4" data-location-id="2">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center">
-                            <label class="inline-flex items-center mr-3">
-                                <input type="radio" name="primary-location" value="2" class="h-4 w-4 text-blue-600 focus:ring-blue-500" onchange="setPrimaryLocation(2)">
-                                <span class="ml-2 text-lg font-semibold text-gray-800">Ubicación 2</span>
-                            </label>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button class="text-blue-600 hover:text-blue-800" onclick="editLocation(2)">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-red-600 hover:text-red-800" onclick="deleteLocation(2)">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                        <div>
-                            <span class="font-medium text-gray-700">Dirección:</span>
-                            <p class="text-gray-600">Avenida Secundaria 45, Local 3</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Ciudad:</span>
-                            <p class="text-gray-600">Alcobendas</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Provincia:</span>
-                            <p class="text-gray-600">Madrid</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Código Postal:</span>
-                            <p class="text-gray-600">28100</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Teléfono Fijo:</span>
-                            <p class="text-gray-600">91 234 56 78</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Móvil:</span>
-                            <p class="text-gray-600">234 567 890</p>
-                        </div>
-                        <div class="md:col-span-2 lg:col-span-3">
-                            <span class="font-medium text-gray-700">Horario:</span>
-                            <p class="text-gray-600">Lunes-Viernes: 9:00-19:00</p>
+                            <p class="text-gray-600">{{location.businessHours}}</p>
                         </div>
                     </div>
                 </div>
@@ -332,7 +287,7 @@
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-semibold text-gray-800">Mis Servicios</h3>
                 <button
-                    onclick="addService()"
+                    (click)="addService()"
                     class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200"
                 >
                     <i class="fas fa-plus mr-2"></i>
@@ -341,52 +296,27 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Servicio 1 -->
-                <div class="border border-gray-200 rounded-lg p-4">
+                <!-- Servicio -->
+                <div class="border border-gray-200 rounded-lg p-4" *ngFor="let service of professionalServices">
                     <div class="flex justify-between items-start mb-3">
-                        <h4 class="text-lg font-semibold text-gray-800">Instalación Eléctrica Completa</h4>
+                        <h4 class="text-lg font-semibold text-gray-800">{{service.name}}</h4>
                         <div class="flex items-center space-x-2">
-                            <button class="text-blue-600 hover:text-blue-800">
+                            <button class="text-blue-600 hover:text-blue-800" (click)="editService(service)">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="text-red-600 hover:text-red-800">
+                            <button class="text-red-600 hover:text-red-800" (click)="deleteService(service)">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
                     </div>
                     <p class="text-gray-600 mb-3">
-                        Instalación completa de sistemas eléctricos para viviendas y locales comerciales.
+                        {{service.description}}
                     </p>
                     <div class="flex justify-between items-center text-sm">
-                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">Desde 150€</span>
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">Desde {{service.price}}€</span>
                         <span class="text-gray-500">
                             <i class="fas fa-clock mr-1"></i>
-                            1-3 días
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Servicio 2 -->
-                <div class="border border-gray-200 rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-3">
-                        <h4 class="text-lg font-semibold text-gray-800">Reparación de Averías</h4>
-                        <div class="flex items-center space-x-2">
-                            <button class="text-blue-600 hover:text-blue-800">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-red-600 hover:text-red-800">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-3">
-                        Diagnóstico y reparación de averías eléctricas. Servicio de urgencia disponible 24 horas.
-                    </p>
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded font-medium">Desde 50€</span>
-                        <span class="text-gray-500">
-                            <i class="fas fa-clock mr-1"></i>
-                            2-4 horas
+                            {{service.estimatedDuration}} horas
                         </span>
                     </div>
                 </div>
@@ -394,23 +324,19 @@
         </div>
 
         <!-- Valoraciones recibidas -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="bg-white rounded-lg shadow-lg p-6" *ngIf="professionalRatings && professionalRatings.length > 0">
             <h3 class="text-2xl font-semibold text-gray-800 mb-6">Valoraciones de Clientes</h3>
 
             <!-- Resumen de valoraciones -->
             <div class="bg-gray-50 rounded-lg p-4 mb-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <div class="text-4xl font-bold text-gray-800 mr-4">4.5</div>
+                        <div class="text-4xl font-bold text-gray-800 mr-4">{{professional?.averageRating?.toFixed(1) || '0.0'}}</div>
                         <div>
                             <div class="flex text-yellow-400 mb-1">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
+                                <i *ngFor="let star of getStars(professional?.averageRating || 0)" [class]="star"></i>
                             </div>
-                            <p class="text-sm text-gray-600">Basado en 23 valoraciones</p>
+                            <p class="text-sm text-gray-600">Basado en {{professional?.ratingCount || 0}} valoraciones</p>
                         </div>
                     </div>
                 </div>
@@ -418,67 +344,29 @@
 
             <!-- Lista de valoraciones -->
             <div class="space-y-6">
-                <!-- Valoración 1 -->
-                <div class="border-b border-gray-200 pb-6">
+                <!-- Valoración -->
+                <div class="border-b border-gray-200 pb-6" *ngFor="let rating of professionalRatings">
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                             <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                                M
+                                {{rating.username.charAt(0).toUpperCase()}}
                             </div>
                         </div>
                         <div class="flex-1">
                             <div class="flex items-center justify-between mb-2">
                                 <div>
-                                    <h4 class="font-semibold text-gray-800">María González</h4>
+                                    <h4 class="font-semibold text-gray-800">{{rating.username}}</h4>
                                     <div class="flex items-center">
                                         <div class="flex text-yellow-400 mr-2">
-                                            <i class="fas fa-star text-sm"></i>
-                                            <i class="fas fa-star text-sm"></i>
-                                            <i class="fas fa-star text-sm"></i>
-                                            <i class="fas fa-star text-sm"></i>
-                                            <i class="fas fa-star text-sm"></i>
+                                            <i *ngFor="let star of getStars(rating.score)" [class]="star"></i>
                                         </div>
-                                        <span class="text-sm text-gray-600">5.0</span>
+                                        <span class="text-sm text-gray-600">{{rating.score.toFixed(1)}}</span>
                                     </div>
                                 </div>
-                                <span class="text-sm text-gray-500">15 de Marzo, 2024</span>
+                                <span class="text-sm text-gray-500">{{rating.date | date}}</span>
                             </div>
                             <p class="text-gray-700">
-                                Excelente servicio. Vinieron muy puntuales y resolvieron el problema eléctrico
-                                de mi cocina en menos tiempo del esperado. Muy profesionales y el precio fue justo.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Valoración 2 -->
-                <div class="border-b border-gray-200 pb-6">
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">
-                                J
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">Juan Pérez</h4>
-                                    <div class="flex items-center">
-                                        <div class="flex text-yellow-400 mr-2">
-                                            <i class="fas fa-star text-sm"></i>
-                                            <i class="fas fa-star text-sm"></i>
-                                            <i class="fas fa-star text-sm"></i>
-                                            <i class="fas fa-star text-sm"></i>
-                                            <i class="far fa-star text-sm"></i>
-                                        </div>
-                                        <span class="text-sm text-gray-600">4.0</span>
-                                    </div>
-                                </div>
-                                <span class="text-sm text-gray-500">8 de Marzo, 2024</span>
-                            </div>
-                            <p class="text-gray-700">
-                                Buen trabajo en la instalación del cuadro eléctrico. El técnico era muy conocedor
-                                y explicó todo el proceso.
+                                {{rating.comment}}
                             </p>
                         </div>
                     </div>
@@ -486,218 +374,5 @@
             </div>
         </div>
     </main>
-
-    <script>
-        let isEditMode = false;
-        let originalValues = {};
-
-        function goBack() {
-            window.history.back();
-        }
-
-        function toggleProfileStatus() {
-            const toggle = document.getElementById('profile-active');
-            const statusText = document.getElementById('status-text');
-            const banner = document.getElementById('profile-status-banner');
-
-            if (toggle.checked) {
-                statusText.textContent = 'Activo';
-                statusText.className = 'text-sm font-medium text-green-600 ml-2';
-                banner.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6';
-                banner.innerHTML = '<div class="flex items-center"><i class="fas fa-check-circle mr-2"></i><span>Tu perfil profesional está activo y visible para los clientes</span></div>';
-            } else {
-                statusText.textContent = 'Inactivo';
-                statusText.className = 'text-sm font-medium text-red-600 ml-2';
-                banner.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6';
-                banner.innerHTML = '<div class="flex items-center"><i class="fas fa-times-circle mr-2"></i><span>Tu perfil profesional está desactivado y no es visible para los clientes</span></div>';
-            }
-        }
-
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            const form = document.getElementById('professional-form');
-            const inputs = form.querySelectorAll('input:not([type="file"]), select, textarea');
-            const editBtn = document.getElementById('edit-profile-btn');
-            const actionButtons = document.getElementById('profile-action-buttons');
-            const changePhotoBtn = document.getElementById('change-business-photo-btn');
-
-            if (isEditMode) {
-                // Guardar valores originales
-                originalValues = {};
-                inputs.forEach(input => {
-                    originalValues[input.id] = input.value;
-                    input.removeAttribute('readonly');
-                    input.removeAttribute('disabled');
-                    input.classList.remove('bg-gray-100', 'text-gray-500', 'cursor-not-allowed');
-                    input.classList.add('bg-white', 'text-gray-900');
-                });
-
-                // Cambiar botón de editar
-                editBtn.innerHTML = '<i class="fas fa-times mr-2"></i>Cancelar Edición';
-                editBtn.classList.remove('bg-white', 'text-blue-600', 'hover:bg-blue-50');
-                editBtn.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
-
-                // Mostrar botones de acción
-                actionButtons.classList.remove('hidden');
-
-                // Mostrar botón de cambiar foto
-                changePhotoBtn.classList.remove('hidden');
-            } else {
-                cancelProfileEdit();
-            }
-        }
-
-        function cancelProfileEdit() {
-            isEditMode = false;
-            const form = document.getElementById('professional-form');
-            const inputs = form.querySelectorAll('input:not([type="file"]), select, textarea');
-            const editBtn = document.getElementById('edit-profile-btn');
-            const actionButtons = document.getElementById('profile-action-buttons');
-            const changePhotoBtn = document.getElementById('change-business-photo-btn');
-
-            // Restaurar valores originales
-            inputs.forEach(input => {
-                if (originalValues[input.id] !== undefined) {
-                    input.value = originalValues[input.id];
-                }
-                input.setAttribute('readonly', 'true');
-                if (input.tagName === 'SELECT') {
-                    input.setAttribute('disabled', 'true');
-                }
-                input.classList.remove('bg-white', 'text-gray-900');
-                input.classList.add('bg-gray-100', 'text-gray-500', 'cursor-not-allowed');
-            });
-
-            // Restaurar botón de editar
-            editBtn.innerHTML = '<i class="fas fa-edit mr-2"></i>Editar Perfil';
-            editBtn.classList.remove('bg-red-500', 'text-white', 'hover:bg-red-600');
-            editBtn.classList.add('bg-white', 'text-blue-600', 'hover:bg-blue-50');
-
-            // Ocultar botones de acción
-            actionButtons.classList.add('hidden');
-
-            // Ocultar botón de cambiar foto
-            changePhotoBtn.classList.add('hidden');
-        }
-
-        function handleBusinessImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('business-image').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function handleProfileUpdate(event) {
-            event.preventDefault();
-
-            // Actualizar información en el header
-            updateHeaderInfo();
-
-            alert('Perfil profesional actualizado correctamente');
-            toggleEditMode();
-        }
-
-        function updateHeaderInfo() {
-            const businessName = document.getElementById('business-name').value;
-            const guild = document.getElementById('guild').value;
-            const experience = document.getElementById('experience').value;
-            const description = document.getElementById('description').value;
-
-            document.getElementById('display-business-name').textContent = businessName;
-            document.getElementById('display-guild').textContent = guild.charAt(0).toUpperCase() + guild.slice(1);
-            document.getElementById('display-experience').textContent = experience;
-            document.getElementById('display-description').textContent = description;
-        }
-
-        function addLocation() {
-            showLocationModal();
-        }
-
-        function addService() {
-            alert('Funcionalidad para añadir nuevo servicio');
-        }
-
-        // Inicializar valores originales al cargar la página
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('professional-form');
-            const inputs = form.querySelectorAll('input:not([type="file"]), select, textarea');
-
-            inputs.forEach(input => {
-                originalValues[input.id] = input.value;
-            });
-        });
-
-        // Gestión de ubicaciones
-        function setPrimaryLocation(locationId) {
-            // Eliminar la etiqueta "Principal" de todas las ubicaciones
-            const locations = document.querySelectorAll('#locations-container > div');
-            locations.forEach(location => {
-                const badge = location.querySelector('.bg-green-100');
-                if (badge) {
-                    badge.remove();
-                }
-            });
-
-            // Añadir la etiqueta "Principal" a la ubicación seleccionada
-            const selectedLocation = document.querySelector(`[data-location-id="${locationId}"]`);
-            const labelContainer = selectedLocation.querySelector('.flex.items-center');
-
-            // Crear y añadir la etiqueta "Principal"
-            const primaryBadge = document.createElement('span');
-            primaryBadge.className = 'bg-green-100 text-green-800 px-2 py-1 rounded text-sm';
-            primaryBadge.textContent = 'Principal';
-            labelContainer.appendChild(primaryBadge);
-
-            // Aquí se enviaría la actualización al servidor
-            console.log(`Ubicación ${locationId} establecida como principal`);
-
-            // Mostrar notificación
-            alert(`Ubicación ${locationId} establecida como principal`);
-        }
-
-        function showLocationModal(locationId = null) {
-            // Aquí se implementaría la lógica para mostrar un modal para añadir/editar ubicación
-            if (locationId) {
-                alert(`Editar ubicación ${locationId}`);
-            } else {
-                alert('Añadir nueva ubicación');
-            }
-        }
-
-        function editLocation(locationId) {
-            showLocationModal(locationId);
-        }
-
-        function deleteLocation(locationId) {
-            if (confirm(`¿Estás seguro de que deseas eliminar la ubicación ${locationId}?`)) {
-                // Aquí se implementaría la lógica para eliminar la ubicación
-                console.log(`Ubicación ${locationId} eliminada`);
-
-                // Comprobar si es la ubicación principal
-                const isMainLocation = document.querySelector(`[data-location-id="${locationId}"] input[name="primary-location"]`).checked;
-
-                // Eliminar el elemento del DOM
-                const locationElement = document.querySelector(`[data-location-id="${locationId}"]`);
-                locationElement.remove();
-
-                // Si era la principal, establecer otra como principal
-                if (isMainLocation) {
-                    const firstLocation = document.querySelector('#locations-container > div');
-                    if (firstLocation) {
-                        const firstLocationId = firstLocation.getAttribute('data-location-id');
-                        const radioButton = firstLocation.querySelector('input[name="primary-location"]');
-                        radioButton.checked = true;
-                        setPrimaryLocation(firstLocationId);
-                    }
-                }
-
-                alert(`Ubicación ${locationId} eliminada correctamente`);
-            }
-        }
-    </script>
 </body>
 </html>
