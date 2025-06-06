@@ -288,18 +288,16 @@ export class UserProfileProfessionalComponent {
     }
   }
 
-
-
-
   deleteService(service: ProfessionalService): void {
     if (confirm(`¿Estás seguro de que deseas eliminar el servicio "${service.name}"?`)) {
-      this.http.delete(`http://localhost:8080/api/services/${this.professionalId}/${service.name}`)
+      this.http.delete(`http://localhost:8080/api/services/${service.id}`)
         .subscribe({
           next: () => {
-            this.professionalServices = this.professionalServices.filter(s => s.name !== service.name);
+            this.professionalServices = this.professionalServices.filter(s => s.id !== service.id);
           },
           error: (err) => {
             console.error('Error deleting service', err);
+            alert('Error al eliminar el servicio');
           }
         });
     }
@@ -352,7 +350,7 @@ export class UserProfileProfessionalComponent {
     if (!this.professionalId) return;
 
     if (this.isEditingService) {
-      console.log(this.newService);
+
       this.http.put(`http://localhost:8080/api/services/${this.serviceId}`, this.newService)
         .subscribe({
           next: () => {
