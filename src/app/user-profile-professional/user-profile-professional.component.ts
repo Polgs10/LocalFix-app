@@ -190,12 +190,23 @@ export class UserProfileProfessionalComponent {
     event.preventDefault();
     if (!this.professionalId || !this.professional) return;
 
-    this.http.put(`http://localhost:8080/api/professionals/${this.professionalId}/details`, this.professional)
+    const updateRequest = {
+      professionalId: this.professionalId,
+      businessName: this.professional.businessName,
+      email: this.professional.email,
+      description: this.professional.description,
+      experience: this.professional.experience,
+      guildName: this.professional.guild
+    };
+
+    this.http.put(`http://localhost:8080/api/professionals/update`, updateRequest)
       .subscribe({
         next: () => {
           this.originalProfessional = {...this.professional!};
           this.isEditMode = false;
           alert('Perfil actualizado correctamente');
+          // Recargar los datos para asegurar consistencia
+          this.loadProfessionalDetails();
         },
         error: (err) => {
           console.error('Error updating professional details', err);
@@ -205,21 +216,26 @@ export class UserProfileProfessionalComponent {
   }
 
   toggleProfileStatus(): void {
-    if (!this.professional) return;
+    if (!this.professional || !this.professionalId) return;
 
-    this.professional.active = !this.professional.active;
-    this.http.put(`http://localhost:8080/api/professionals/${this.professionalId}/status`, { active: this.professional.active })
+    const newStatus = !this.professional.active;
+
+    this.http.put(`http://localhost:8080/api/professionals/${this.professionalId}/status`, newStatus)
       .subscribe({
         next: () => {
-          if (this.professional) {
-            this.originalProfessional = {...this.professional};
+          this.professional!.active = newStatus;
+          if (this.originalProfessional) {
+            this.originalProfessional.active = newStatus;
           }
+          const message = newStatus
+            ? 'Perfil activado correctamente'
+            : 'Perfil desactivado correctamente';
+          alert(message);
         },
         error: (err) => {
           console.error('Error updating professional status', err);
-          if (this.professional && this.originalProfessional) {
-            this.professional.active = this.originalProfessional.active;
-          }
+          alert('Error al actualizar el estado del perfil');
+          this.professional!.active = !newStatus;
         }
       });
   }
@@ -247,7 +263,6 @@ export class UserProfileProfessionalComponent {
   }
 
   showLocationModal(locationId?: number): void {
-    // Implementar lógica para mostrar modal de ubicación
     if (locationId) {
       alert(`Editar ubicación ${locationId}`);
     } else {
@@ -297,7 +312,7 @@ export class UserProfileProfessionalComponent {
           },
           error: (err) => {
             console.error('Error deleting service', err);
-            alert('Error al eliminar el servicio');
+            alert('Error to delete service');
           }
         });
     }
@@ -352,26 +367,26 @@ export class UserProfileProfessionalComponent {
     if (this.isEditingService) {
 
       this.http.put(`http://localhost:8080/api/services/${this.serviceId}`, this.newService)
-        .subscribe({
-          next: () => {
-            this.loadProfessionalServices();
-            this.showServiceModal = false;
-          },
-          error: (err) => {
-            console.error('Error updating service', err);
-          }
-        });
+      .subscribe({
+        next: () => {
+          this.loadProfessionalServices();
+          this.showServiceModal = false;
+        },
+        error: (err) => {
+          console.error('Error updating service', err);
+        }
+      });
     } else {
       this.http.post(`http://localhost:8080/api/services`, this.newService)
-        .subscribe({
-          next: () => {
-            this.loadProfessionalServices();
-            this.showServiceModal = false;
-          },
-          error: (err) => {
-            console.error('Error creating service', err);
-          }
-        });
+      .subscribe({
+        next: () => {
+          this.loadProfessionalServices();
+          this.showServiceModal = false;
+        },
+        error: (err) => {
+          console.error('Error creating service', err);
+        }
+      });
     }
   }
 }

@@ -21,6 +21,7 @@ export class BodyComponent {
     province: '',
     experience: '',
     minRating: '',
+    username: ''
   };
   error: string | null = null;
   isLoading = true;
@@ -28,7 +29,6 @@ export class BodyComponent {
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.loadInitialData();
 
     this.route.paramMap.subscribe(params => {
       const username = params.get('username');
@@ -41,6 +41,7 @@ export class BodyComponent {
       }
     });
 
+    this.loadInitialData();
   }
 
   loadInitialData(): void {
@@ -65,7 +66,7 @@ export class BodyComponent {
     if (this.filters.province) params.province = this.filters.province;
     if (this.filters.experience) params.experience = this.filters.experience;
     if (this.filters.minRating) params.minRating = this.filters.minRating;
-    if (this.username) params.username = this.username;
+    params.username = this.username
 
     this.http.get<ProfessionalCard[]>('http://localhost:8080/api/professionals', { params }).subscribe({
       next: (data) => {
@@ -92,6 +93,7 @@ export class BodyComponent {
       province: '',
       experience: '',
       minRating: '',
+      username: ''
     };
     this.loadProfessionals();
   }
