@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Service } from '../model/Service.model';
+import { Service } from '../model/service.model';
 
 @Component({
   selector: 'app-user-profile-professional',
