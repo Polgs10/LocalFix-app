@@ -36,6 +36,7 @@ export interface ProfessionalLocation {
 }
 
 export interface ProfessionalService {
+  id: number;
   name: string;
   description: string;
   price: number;

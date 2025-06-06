@@ -142,7 +142,7 @@ export class RegisterProfessionalComponent {
           console.error(err);
           this.isLoading = false;
         }
-      });
+    });
   }
 
   uploadImage(username: string): void {

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Service } from '../model/Service.model';
 
 @Component({
   selector: 'app-user-profile-professional',
@@ -287,15 +288,8 @@ export class UserProfileProfessionalComponent {
     }
   }
 
-  addService(): void {
-    // Implementar lógica para añadir servicio
-    alert('Añadir nuevo servicio');
-  }
 
-  editService(service: ProfessionalService): void {
-    // Implementar lógica para editar servicio
-    alert(`Editar servicio: ${service.name}`);
-  }
+
 
   deleteService(service: ProfessionalService): void {
     if (confirm(`¿Estás seguro de que deseas eliminar el servicio "${service.name}"?`)) {
@@ -313,5 +307,73 @@ export class UserProfileProfessionalComponent {
 
   goBack() {
     this.router.navigate(['/layout', this.username]);
+  }
+
+  isEditingService: boolean | null = null;
+  showServiceModal: boolean | null = null;
+  editingServiceName: string | null = null;
+  serviceId: number | null = null;
+
+  newService: Service = {
+    professionalId: this.professionalId || 0,
+    name: '',
+    description: '',
+    price: 0,
+    estimatedDuration: 1
+  };
+
+  addService(): void {
+    this.newService = {
+      professionalId: this.professionalId || 0,
+      name: '',
+      description: '',
+      price: 0,
+      estimatedDuration: 1
+    };
+    this.isEditingService = false;
+    this.showServiceModal = true;
+  }
+
+  editService(service: ProfessionalService): void {
+    this.newService = {
+      professionalId: this.professionalId || 0,
+      name: service.name,
+      description: service.description,
+      price: service.price,
+      estimatedDuration: service.estimatedDuration
+    };
+    this.isEditingService = true;
+    this.editingServiceName = service.name;
+    this.serviceId = service.id
+    this.showServiceModal = true;
+  }
+
+  saveService(): void {
+    if (!this.professionalId) return;
+
+    if (this.isEditingService) {
+      console.log(this.newService);
+      this.http.put(`http://localhost:8080/api/services/${this.serviceId}`, this.newService)
+        .subscribe({
+          next: () => {
+            this.loadProfessionalServices();
+            this.showServiceModal = false;
+          },
+          error: (err) => {
+            console.error('Error updating service', err);
+          }
+        });
+    } else {
+      this.http.post(`http://localhost:8080/api/services`, this.newService)
+        .subscribe({
+          next: () => {
+            this.loadProfessionalServices();
+            this.showServiceModal = false;
+          },
+          error: (err) => {
+            console.error('Error creating service', err);
+          }
+        });
+    }
   }
 }
