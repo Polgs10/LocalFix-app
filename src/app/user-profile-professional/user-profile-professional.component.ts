@@ -135,6 +135,7 @@ export class UserProfileProfessionalComponent {
     this.http.get<ProfessionalLocation[]>(`http://localhost:8080/api/professional-locations/${this.professionalId}/locations`)
       .subscribe({
         next: (data) => {
+          console.log(data);
           this.professionalLocations = data;
         },
         error: (err) => {
@@ -262,45 +263,28 @@ export class UserProfileProfessionalComponent {
       });
   }
 
-  showLocationModal(locationId?: number): void {
-    if (locationId) {
-      alert(`Editar ubicación ${locationId}`);
-    } else {
-      alert('Añadir nueva ubicación');
-    }
-  }
-
   setPrimaryLocation(locationId: number): void {
-    this.http.put(`http://localhost:8080/api/professional-locations/${locationId}/primary`, {})
-      .subscribe({
-        next: () => {
-          this.professionalLocations = this.professionalLocations.map(loc => ({
-            ...loc,
-            primary: loc.id === locationId
-          }));
-        },
-        error: (err) => {
-          console.error('Error setting primary location', err);
-        }
-      });
-  }
-
-  editLocation(locationId: number): void {
-    this.showLocationModal(locationId);
-  }
-
-  deleteLocation(locationId: number): void {
-    if (confirm('¿Estás seguro de que deseas eliminar esta ubicación?')) {
-      this.http.delete(`http://localhost:8080/api/professional-locations/${locationId}`)
-        .subscribe({
-          next: () => {
-            this.professionalLocations = this.professionalLocations.filter(loc => loc.id !== locationId);
-          },
-          error: (err) => {
-            console.error('Error deleting location', err);
-          }
-        });
+    console.log('Location ID:', locationId); // Verifica que tenga un valor válido
+    if (!locationId) {
+      alert('Error: ID de ubicación no válido');
+      return;
     }
+
+    this.http.put(
+      `http://localhost:8080/api/professional-locations/${this.professionalId}/${locationId}`,
+      {}
+    ).subscribe({
+      next: () => {
+        this.professionalLocations = this.professionalLocations.map(loc => ({
+          ...loc,
+          primary: loc.id === locationId
+        }));
+      },
+      error: (err) => {
+        console.error('Error al actualizar la ubicación primaria', err);
+        alert('Error al cambiar la ubicación primaria');
+      }
+    });
   }
 
   deleteService(service: ProfessionalService): void {
@@ -387,6 +371,123 @@ export class UserProfileProfessionalComponent {
           console.error('Error creating service', err);
         }
       });
+    }
+  }
+
+  showLocationModal = false;
+  isEditingLocation = false;
+  editingLocationId: number | null = null;
+
+  newLocation: ProfessionalLocation = {
+    id: 0,
+    address: '',
+    city: '',
+    province: '',
+    postalCode: '',
+    country: '',
+    landlinePhone: '',
+    mobilePhone: '',
+    businessHours: '',
+    primary: false
+  };
+
+  showLocationModall(location?: ProfessionalLocation): void {
+    this.showLocationModal = true;
+    if (location) {
+      // Modo edición
+      this.isEditingLocation = true;
+      this.editingLocationId = location.id;
+      this.newLocation = {...location};
+    } else {
+      // Modo creación
+      this.isEditingLocation = false;
+      this.editingLocationId = null;
+      this.newLocation = {
+        id: 0,
+        address: '',
+        city: '',
+        province: '',
+        postalCode: '',
+        country: '',
+        landlinePhone: '',
+        mobilePhone: '',
+        businessHours: '',
+        primary: false
+      };
+    }
+  }
+
+  saveLocation(): void {
+  // Validar que todos los campos requeridos están completos
+    if (!this.newLocation.address || !this.newLocation.city ||
+        !this.newLocation.province || !this.newLocation.postalCode ||
+        !this.newLocation.country || !this.newLocation.mobilePhone ||
+        !this.newLocation.businessHours) {
+      alert('Por favor complete todos los campos requeridos');
+      return;
+    }
+
+    // Resto de tu lógica de guardado...
+    if (!this.professionalId) return;
+
+    if (this.isEditingLocation && this.editingLocationId) {
+
+      const originalLocation = this.professionalLocations.find(loc => loc.id === this.editingLocationId);
+
+      // Actualizar ubicación existente - incluir el campo primary
+      const updatedLocation = {
+        ...this.newLocation,
+        isPrimary: originalLocation ? originalLocation.primary : false
+      };
+
+      // Actualizar ubicación existente
+      this.http.put(`http://localhost:8080/api/professional-locations/${this.editingLocationId}`, updatedLocation)
+        .subscribe({
+          next: () => {
+            this.loadProfessionalLocations();
+            this.showLocationModal = false;
+          },
+          error: (err) => {
+            console.error('Error updating location', err);
+            alert('Error al actualizar la ubicación');
+          }
+        });
+    } else {
+      // Crear nueva ubicación
+      this.http.post(`http://localhost:8080/api/professional-locations/${this.professionalId}`, this.newLocation).subscribe({
+        next: () => {
+          this.loadProfessionalLocations();
+          this.showLocationModal = false;
+        },
+        error: (err) => {
+          console.error('Error creating location', err);
+          alert('Error al crear la ubicación');
+        }
+      });
+    }
+  }
+
+  deleteLocation(locationId: number): void {
+    const location = this.professionalLocations.find(loc => loc.id === locationId);
+
+    if (!location) return;
+
+    if (location.primary) {
+      alert('No se puede eliminar la ubicación primaria');
+      return;
+    }
+
+    if (confirm('¿Estás seguro de que deseas eliminar esta ubicación?')) {
+      this.http.delete(`http://localhost:8080/api/professional-locations/${locationId}`)
+        .subscribe({
+          next: () => {
+            this.professionalLocations = this.professionalLocations.filter(loc => loc.id !== locationId);
+          },
+          error: (err) => {
+            console.error('Error deleting location', err);
+            alert('Error al eliminar la ubicación');
+          }
+        });
     }
   }
 }

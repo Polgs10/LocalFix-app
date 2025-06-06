@@ -134,135 +134,135 @@
             <!-- Formulario de perfil profesional -->
             <div class="p-6" *ngIf="professional">
                 <form id="professional-form" (submit)="handleProfileUpdate($event)">
-  <!-- Campos del formulario -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Nombre del negocio -->
-    <div>
-      <label for="business-name" class="block text-sm font-medium text-gray-700 mb-2">
-        Nombre del Negocio
-      </label>
-      <input
-        id="business-name"
-        name="business-name"
-        type="text"
-        [(ngModel)]="professional.businessName"
-        [readonly]="!isEditMode"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md"
-        [class.bg-gray-100]="!isEditMode"
-        [class.text-gray-500]="!isEditMode"
-        [class.cursor-not-allowed]="!isEditMode"
-        [class.bg-white]="isEditMode"
-        [class.text-gray-900]="isEditMode"
-        required
-      >
-    </div>
+                  <!-- Campos del formulario -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nombre del negocio -->
+                    <div>
+                      <label for="business-name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre del Negocio
+                      </label>
+                      <input
+                        id="business-name"
+                        name="business-name"
+                        type="text"
+                        [(ngModel)]="professional.businessName"
+                        [readonly]="!isEditMode"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        [class.bg-gray-100]="!isEditMode"
+                        [class.text-gray-500]="!isEditMode"
+                        [class.cursor-not-allowed]="!isEditMode"
+                        [class.bg-white]="isEditMode"
+                        [class.text-gray-900]="isEditMode"
+                        required
+                      >
+                    </div>
 
-    <!-- Email -->
-    <div>
-      <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-        Email
-      </label>
-      <input
-        id="email"
-        name="email"
-        type="email"
-        [(ngModel)]="professional.email"
-        [readonly]="!isEditMode"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md"
-        [class.bg-gray-100]="!isEditMode"
-        [class.text-gray-500]="!isEditMode"
-        [class.cursor-not-allowed]="!isEditMode"
-        [class.bg-white]="isEditMode"
-        [class.text-gray-900]="isEditMode"
-        required
-      >
-    </div>
+                    <!-- Email -->
+                    <div>
+                      <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                      </label>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        [(ngModel)]="professional.email"
+                        [readonly]="!isEditMode"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        [class.bg-gray-100]="!isEditMode"
+                        [class.text-gray-500]="!isEditMode"
+                        [class.cursor-not-allowed]="!isEditMode"
+                        [class.bg-white]="isEditMode"
+                        [class.text-gray-900]="isEditMode"
+                        required
+                      >
+                    </div>
 
-    <!-- Gremio -->
-    <div>
-      <label for="guild" class="block text-sm font-medium text-gray-700 mb-2">
-        Gremio/Profesión
-      </label>
-      <select
-        id="guild"
-        name="guild"
-        [(ngModel)]="professional.guild"
-        [disabled]="!isEditMode"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md"
-        [class.bg-gray-100]="!isEditMode"
-        [class.text-gray-500]="!isEditMode"
-        [class.cursor-not-allowed]="!isEditMode"
-        [class.bg-white]="isEditMode"
-        [class.text-gray-900]="isEditMode"
-        required
-      >
-        <option *ngFor="let guild of guilds" [value]="guild">{{guild}}</option>
-      </select>
-    </div>
+                    <!-- Gremio -->
+                    <div>
+                      <label for="guild" class="block text-sm font-medium text-gray-700 mb-2">
+                        Gremio/Profesión
+                      </label>
+                      <select
+                        id="guild"
+                        name="guild"
+                        [(ngModel)]="professional.guild"
+                        [disabled]="!isEditMode"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        [class.bg-gray-100]="!isEditMode"
+                        [class.text-gray-500]="!isEditMode"
+                        [class.cursor-not-allowed]="!isEditMode"
+                        [class.bg-white]="isEditMode"
+                        [class.text-gray-900]="isEditMode"
+                        required
+                      >
+                        <option *ngFor="let guild of guilds" [value]="guild">{{guild}}</option>
+                      </select>
+                    </div>
 
-    <!-- Experiencia -->
-    <div>
-      <label for="experience" class="block text-sm font-medium text-gray-700 mb-2">
-        Años de Experiencia
-      </label>
-      <input
-        id="experience"
-        name="experience"
-        type="number"
-        [(ngModel)]="professional.experience"
-        [readonly]="!isEditMode"
-        min="0"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md"
-        [class.bg-gray-100]="!isEditMode"
-        [class.text-gray-500]="!isEditMode"
-        [class.cursor-not-allowed]="!isEditMode"
-        [class.bg-white]="isEditMode"
-        [class.text-gray-900]="isEditMode"
-        required
-      >
-    </div>
+                    <!-- Experiencia -->
+                    <div>
+                      <label for="experience" class="block text-sm font-medium text-gray-700 mb-2">
+                        Años de Experiencia
+                      </label>
+                      <input
+                        id="experience"
+                        name="experience"
+                        type="number"
+                        [(ngModel)]="professional.experience"
+                        [readonly]="!isEditMode"
+                        min="0"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        [class.bg-gray-100]="!isEditMode"
+                        [class.text-gray-500]="!isEditMode"
+                        [class.cursor-not-allowed]="!isEditMode"
+                        [class.bg-white]="isEditMode"
+                        [class.text-gray-900]="isEditMode"
+                        required
+                      >
+                    </div>
 
-    <!-- Descripción -->
-    <div class="md:col-span-2">
-      <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-        Descripción del Negocio
-      </label>
-      <textarea
-        id="description"
-        name="description"
-        rows="4"
-        [(ngModel)]="professional.description"
-        [readonly]="!isEditMode"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md"
-        [class.bg-gray-100]="!isEditMode"
-        [class.text-gray-500]="!isEditMode"
-        [class.cursor-not-allowed]="!isEditMode"
-        [class.bg-white]="isEditMode"
-        [class.text-gray-900]="isEditMode"
-        required
-      ></textarea>
-    </div>
-  </div>
+                    <!-- Descripción -->
+                    <div class="md:col-span-2">
+                      <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                        Descripción del Negocio
+                      </label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        rows="4"
+                        [(ngModel)]="professional.description"
+                        [readonly]="!isEditMode"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        [class.bg-gray-100]="!isEditMode"
+                        [class.text-gray-500]="!isEditMode"
+                        [class.cursor-not-allowed]="!isEditMode"
+                        [class.bg-white]="isEditMode"
+                        [class.text-gray-900]="isEditMode"
+                        required
+                      ></textarea>
+                    </div>
+                  </div>
 
-  <!-- Botones de acción -->
-  <div id="profile-action-buttons" class="flex flex-col sm:flex-row gap-4 pt-6" [class.hidden]="!isEditMode">
-    <button
-      type="submit"
-      class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
-    >
-      <i class="fas fa-save mr-2"></i>
-      Guardar Cambios
-    </button>
-    <button
-      type="button"
-      (click)="cancelProfileEdit()"
-      class="flex-1 bg-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200"
-    >
-      <i class="fas fa-times mr-2"></i>
-      Cancelar
-    </button>
-  </div>
-</form>
+                  <!-- Botones de acción -->
+                  <div id="profile-action-buttons" class="flex flex-col sm:flex-row gap-4 pt-6" [class.hidden]="!isEditMode">
+                    <button
+                      type="submit"
+                      class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+                    >
+                      <i class="fas fa-save mr-2"></i>
+                      Guardar Cambios
+                    </button>
+                    <button
+                      type="button"
+                      (click)="cancelProfileEdit()"
+                      class="flex-1 bg-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200"
+                    >
+                      <i class="fas fa-times mr-2"></i>
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
             </div>
         </div>
 
@@ -272,7 +272,7 @@
                 <h3 class="text-2xl font-semibold text-gray-800">Ubicaciones</h3>
                 <button
                     id="add-location-btn"
-                    (click)="showLocationModal()"
+                    (click)="showLocationModall()"
                     class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
                 >
                     <i class="fas fa-plus mr-2"></i>
@@ -286,13 +286,19 @@
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex items-center">
                             <label class="inline-flex items-center mr-3">
-                                <input type="radio" name="primary-location" [value]="location.id" [checked]="location.primary" (change)="setPrimaryLocation(location.id)" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
-                                <span class="ml-2 text-lg font-semibold text-gray-800">Ubicación {{location.id}}</span>
+                                <input
+                                  type="radio"
+                                  name="primary-location"
+                                  [value]="location.id"
+                                  [checked]="location.primary"
+                                  (change)="setPrimaryLocation(location.id)"
+                                  class="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                                >
                             </label>
                             <span *ngIf="location.primary" class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Principal</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <button class="text-blue-600 hover:text-blue-800" (click)="editLocation(location.id)">
+                            <button class="text-blue-600 hover:text-blue-800" (click)="showLocationModall(location)">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="text-red-600 hover:text-red-800" (click)="deleteLocation(location.id)">
@@ -301,35 +307,39 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                        <div>
-                            <span class="font-medium text-gray-700">Dirección:</span>
-                            <p class="text-gray-600">{{location.address}}</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Ciudad:</span>
-                            <p class="text-gray-600">{{location.city}}</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Provincia:</span>
-                            <p class="text-gray-600">{{location.province}}</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Código Postal:</span>
-                            <p class="text-gray-600">{{location.postalCode}}</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Teléfono Fijo:</span>
-                            <p class="text-gray-600">{{location.landlinePhone}}</p>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Móvil:</span>
-                            <p class="text-gray-600">{{location.mobilePhone}}</p>
-                        </div>
-                        <div class="md:col-span-2 lg:col-span-3">
-                            <span class="font-medium text-gray-700">Horario:</span>
-                            <p class="text-gray-600">{{location.businessHours}}</p>
-                        </div>
-                    </div>
+                      <div>
+                          <span class="font-medium text-gray-700">Dirección:</span>
+                          <p class="text-gray-600">{{location.address}}</p>
+                      </div>
+                      <div>
+                          <span class="font-medium text-gray-700">Ciudad:</span>
+                          <p class="text-gray-600">{{location.city}}</p>
+                      </div>
+                      <div>
+                          <span class="font-medium text-gray-700">Provincia:</span>
+                          <p class="text-gray-600">{{location.province}}</p>
+                      </div>
+                      <div>
+                          <span class="font-medium text-gray-700">Código Postal:</span>
+                          <p class="text-gray-600">{{location.postalCode}}</p>
+                      </div>
+                      <div>
+                          <span class="font-medium text-gray-700">Teléfono Fijo:</span>
+                          <p class="text-gray-600">{{location.landlinePhone}}</p>
+                      </div>
+                      <div>
+                          <span class="font-medium text-gray-700">Móvil:</span>
+                          <p class="text-gray-600">{{location.mobilePhone}}</p>
+                      </div>
+                      <div>
+                          <span class="font-medium text-gray-700">País:</span>
+                          <p class="text-gray-600">{{location.country}}</p>
+                      </div>
+                      <div>
+                          <span class="font-medium text-gray-700">Horario:</span>
+                          <p class="text-gray-600">{{location.businessHours}}</p>
+                      </div>
+                  </div>
                 </div>
             </div>
         </div>
@@ -511,6 +521,162 @@
                                 class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 {{isEditingService ? 'Guardar Cambios' : 'Añadir Servicio'}}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para añadir/editar ubicaciones -->
+        <div *ngIf="showLocationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                        {{isEditingLocation ? 'Editar Ubicación' : 'Añadir Nueva Ubicación'}}
+                    </h3>
+
+                    <form (submit)="saveLocation(); $event.preventDefault()">
+                        <div class="space-y-4">
+                            <!-- Dirección -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Dirección
+                                </label>
+                                <input
+                                    type="text"
+                                    [(ngModel)]="newLocation.address"
+                                    name="address"
+                                    required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+
+                            <!-- Ciudad -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Ciudad
+                                </label>
+                                <input
+                                    type="text"
+                                    [(ngModel)]="newLocation.city"
+                                    name="city"
+                                    required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+
+                            <!-- Provincia -->
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Provincia
+                              </label>
+                              <select
+                                [(ngModel)]="newLocation.province"
+                                name="province"
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="" disabled selected>Selecciona una provincia</option>
+                                <option value="Madrid">Madrid</option>
+                                <option value="Barcelona">Barcelona</option>
+                                <option value="Valencia">Valencia</option>
+                                <option value="Sevilla">Sevilla</option>
+                                <option value="Zaragoza">Zaragoza</option>
+                                <option value="Málaga">Málaga</option>
+                                <option value="Murcia">Murcia</option>
+                                <option value="Vizcaya">Vizcaya</option>
+                                <option value="Alicante">Alicante</option>
+                                <option value="Granada">Granada</option>
+                              </select>
+                            </div>
+
+                            <!-- Código Postal -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Código Postal
+                                </label>
+                                <input
+                                    type="text"
+                                    [(ngModel)]="newLocation.postalCode"
+                                    name="postalCode"
+                                    required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+
+                            <!-- País -->
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">
+                                País
+                              </label>
+                              <select
+                                [(ngModel)]="newLocation.country"
+                                name="country"
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="" disabled selected>Selecciona un país</option>
+                                <option value="España">España</option>
+                              </select>
+                            </div>
+
+                            <!-- Teléfono Fijo -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Teléfono Fijo
+                                </label>
+                                <input
+                                    type="tel"
+                                    [(ngModel)]="newLocation.landlinePhone"
+                                    name="landlinePhone"
+                                    required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+
+                            <!-- Teléfono Móvil -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Teléfono Móvil
+                                </label>
+                                <input
+                                    type="tel"
+                                    [(ngModel)]="newLocation.mobilePhone"
+                                    name="mobilePhone"
+                                    required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+
+                            <!-- Horario -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Horario de Atención
+                                </label>
+                                <textarea
+                                    [(ngModel)]="newLocation.businessHours"
+                                    name="businessHours"
+                                    rows="3"
+                                    required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button
+                                type="button"
+                                (click)="showLocationModal = false"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                {{isEditingLocation ? 'Guardar Cambios' : 'Añadir Ubicación'}}
                             </button>
                         </div>
                     </form>
