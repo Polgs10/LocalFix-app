@@ -142,6 +142,7 @@ export class DetailsProfessionalComponent {
       .subscribe({
         next: (data) => {
           this.professional = data;
+          console.log(data);
         },
         error: (err) => {
           console.error('Error loading professional details', err);

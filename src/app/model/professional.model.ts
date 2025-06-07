@@ -20,7 +20,7 @@ export interface ProfessionalCard {
   description: string;
   rating: number;
   province: string;
-  image?: string;
+  businessImagePath: string;
 }
 
 export interface ProfessionalLocation {
