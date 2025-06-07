@@ -113,58 +113,48 @@ export class RegisterProfessionalComponent {
       return;
     }
 
-    const formData = new FormData();
+    this.isLoading = true;
 
-    // Agregar la imagen si existe
-    if (this.selectedFile) {
-      formData.append('businessPhoto', this.selectedFile);
-    }
-
-    // Agregar los datos del profesional
     const requestData = {
       username: this.username,
       ...this.professionalData
     };
-    formData.append('professionalData', JSON.stringify(requestData));
 
-    this.isLoading = true;
+    if (this.selectedFile) {
+      // Usar el nuevo endpoint con imagen
+      const formData = new FormData();
+      formData.append('professionalData', JSON.stringify(requestData));
+      formData.append('businessImage', this.selectedFile);
 
-    // Primero enviar los datos del profesional
-    this.http.post<boolean>('http://localhost:8080/api/professionals', requestData)
-      .subscribe({
-        next: (isCreated) => {
-          if (isCreated) {
-            this.router.navigate(['/user/professional-profile/', this.username]);
+      this.http.post<boolean>('http://localhost:8080/api/professionals/register-with-image', formData)
+        .subscribe({
+          next: (isCreated) => {
+            if (isCreated) {
+              this.router.navigate(['/user/professional-profile/', this.username]);
+            }
+          },
+          error: (err) => {
+            this.error = 'Error registering professional';
+            console.error(err);
+            this.isLoading = false;
           }
-        },
-        error: (err) => {
-          this.error = 'Error registering professional';
-          console.error(err);
-          this.isLoading = false;
-        }
-    });
-  }
-
-  uploadImage(username: string): void {
-    if (!this.selectedFile) return;
-
-    const imageFormData = new FormData();
-    imageFormData.append('image', this.selectedFile);
-
-    this.http.post(`http://localhost:8080/api/professionals/${username}/upload-photo`, imageFormData)
-      .subscribe({
-        next: () => {
-          this.router.navigate(['/user/professional-profile', this.username]);
-        },
-        error: (err) => {
-          console.error('Error uploading image', err);
-          // Aunque falle la imagen, redirigir igual
-          this.router.navigate(['/user/professional-profile', this.username]);
-        },
-        complete: () => {
-          this.isLoading = false;
-        }
-      });
+        });
+    } else {
+      // Usar el endpoint existente sin imagen
+      this.http.post<boolean>('http://localhost:8080/api/professionals', requestData)
+        .subscribe({
+          next: (isCreated) => {
+            if (isCreated) {
+              this.router.navigate(['/user/professional-profile/', this.username]);
+            }
+          },
+          error: (err) => {
+            this.error = 'Error registering professional';
+            console.error(err);
+            this.isLoading = false;
+          }
+        });
+    }
   }
 
   cancelRegistration(): void {

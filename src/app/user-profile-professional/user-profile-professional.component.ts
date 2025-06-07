@@ -28,6 +28,10 @@ export class UserProfileProfessionalComponent {
   isEditMode = false;
   originalProfessional: ProfessionalDetails | null = null;
 
+  private baseImageUrl = "http://localhost:8080/uploads/";
+
+  originalImageUrl: string = '';
+
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
@@ -122,6 +126,26 @@ export class UserProfileProfessionalComponent {
         next: (data) => {
           this.professional = data;
           this.originalProfessional = {...data};
+
+          this.http.get(`http://localhost:8080/api/professionals/${this.professionalId}/business-image`,
+            { responseType: 'text' })
+            .subscribe({
+              next: (imagePath: string) => {
+                if (this.professional) {
+                  this.professional.imageUrl = imagePath
+                    ? this.baseImageUrl + imagePath
+                    : 'https://via.placeholder.com/120x120';
+                  this.originalImageUrl = this.professional.imageUrl; // Guarda la URL original
+                }
+              },
+              error: (err) => {
+                console.error('Error loading business image', err);
+                if (this.professional) {
+                  this.professional.imageUrl = 'https://via.placeholder.com/120x120';
+                  this.originalImageUrl = this.professional.imageUrl; // Guarda la URL original incluso si hay error
+                }
+              }
+            });
         },
         error: (err) => {
           console.error('Error loading professional details', err);
@@ -175,15 +199,16 @@ export class UserProfileProfessionalComponent {
 
   toggleEditMode(): void {
     this.isEditMode = !this.isEditMode;
-    if (!this.isEditMode && this.originalProfessional && this.professional) {
-      this.professional = {...this.originalProfessional};
+    if (!this.isEditMode) {
+        this.cancelProfileEdit();
     }
   }
 
   cancelProfileEdit(): void {
     this.isEditMode = false;
     if (this.originalProfessional && this.professional) {
-      this.professional = {...this.originalProfessional};
+        this.professional = {...this.originalProfessional};
+        this.professional.imageUrl = this.originalImageUrl;
     }
   }
 
@@ -247,20 +272,26 @@ export class UserProfileProfessionalComponent {
 
     const file = input.files[0];
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('businessImage', file);
 
-    this.http.post(`http://localhost:8080/api/professionals/${this.professionalId}/image`, formData)
-      .subscribe({
-        next: (response: any) => {
-          if (this.professional) {
-            this.professional.imageUrl = response.imageUrl;
-            this.originalProfessional = {...this.professional};
-          }
-        },
-        error: (err) => {
-          console.error('Error uploading image', err);
+    this.http.put<boolean>(
+      `http://localhost:8080/api/professionals/${this.professionalId}/update-business-image`,
+      formData
+    ).subscribe({
+      next: (success) => {
+        if (success) {
+          // Recargar la imagen del negocio
+          this.loadProfessionalDetails();
+          alert('Imagen del negocio actualizada correctamente');
+        } else {
+          alert('Error al actualizar la imagen del negocio');
         }
-      });
+      },
+      error: (err) => {
+        console.error('Error updating business image', err);
+        alert('Error al actualizar la imagen del negocio');
+      }
+    });
   }
 
   setPrimaryLocation(locationId: number): void {

@@ -72,26 +72,26 @@
                 <div class="flex items-center space-x-6">
                     <!-- Imagen del profesional -->
                     <div class="relative">
-                        <img
-                            id="business-image"
-                            [src]="professional?.imageUrl || 'https://via.placeholder.com/120x120'"
-                            alt="Logo del negocio"
-                            class="w-24 h-24 rounded-full border-4 border-white object-cover"
-                        >
-                        <button
-                            id="change-business-photo-btn"
-                            class="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 hidden"
-
-                        >
-                            <i class="fas fa-camera text-gray-600 text-sm"></i>
-                        </button>
-                        <input
-                            id="business-file-input"
-                            type="file"
-                            accept="image/*"
-                            class="hidden"
-                            (change)="handleBusinessImageUpload($event)"
-                        >
+                      <img
+                        id="business-image"
+                        [src]="professional?.imageUrl || 'https://via.placeholder.com/120x120'"
+                        alt="Logo del negocio"
+                        class="w-24 h-24 rounded-full border-4 border-white object-cover"
+                      >
+                      <button
+                        *ngIf="isEditMode"
+                        (click)="fileInput.click()"
+                        class="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <i class="fas fa-camera text-gray-600 text-sm"></i>
+                      </button>
+                      <input
+                        #fileInput
+                        type="file"
+                        accept="image/*"
+                        class="hidden"
+                        (change)="handleBusinessImageUpload($event)"
+                      >
                     </div>
 
                     <!-- Información básica -->
@@ -120,12 +120,13 @@
                     <!-- Botón de editar -->
                     <div class="flex-shrink-0">
                         <button
-                            id="edit-profile-btn"
                             (click)="toggleEditMode()"
-                            class="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-500 transition duration-200 font-medium"
+                            [class]="isEditMode ?
+                                'bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-500 transition duration-200 font-medium' :
+                                'bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-500 transition duration-200 font-medium'"
                         >
-                            <i class="fas fa-edit mr-2"></i>
-                            Editar Perfil
+                            <i class="fas mr-2" [ngClass]="isEditMode ? 'fa-times' : 'fa-edit'"></i>
+                            {{isEditMode ? 'Cancelar Edición' : 'Editar Perfil'}}
                         </button>
                     </div>
                 </div>

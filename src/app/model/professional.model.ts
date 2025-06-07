@@ -9,6 +9,7 @@ export interface ProfessionalDetails {
   ratingCount: number;
   imageUrl?: string;
   active: boolean;
+  businessImagePath: string;
 }
 
 export interface ProfessionalCard {
