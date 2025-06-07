@@ -10,6 +10,7 @@ export interface UserProfile {
   date: string;
   ratingCount: number;
   averageRating: number;
+  profileImagePath: string;
 }
 
 export interface UserProfileLocation {

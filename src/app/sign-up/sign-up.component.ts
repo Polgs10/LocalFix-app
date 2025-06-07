@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-sign-up',
@@ -16,6 +17,8 @@ export class SignUpComponent {
   showConfirmPassword = false;
   errorMessage: string | null = null;
   isLoading = false;
+  selectedFile: File | null = null;
+  private apiUrl = 'http://localhost:8080/api/users';
 
   constructor(
     private fb: FormBuilder,
@@ -77,31 +80,57 @@ export class SignUpComponent {
       country: this.registerForm.value.pais
     };
 
-  this.http.post<boolean>('http://localhost:8080/api/users/register', userData)
-    .subscribe({
-      next: (success) => {
-        if (success) {
-          alert('Usuario registrado correctamente');
-          this.router.navigate(['/login']);
-        } else {
-          this.errorMessage = 'Error al registrar el usuario';
-        }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = 'Error al conectar con el servidor';
-        this.isLoading = false;
-        console.error('Error de registro:', error);
-      }
-    });
+    if (this.selectedFile) {
+      this.registerWithImage(userData, this.selectedFile).subscribe({
+        next: (success) => this.handleRegistrationResponse(success),
+        error: (error) => this.handleRegistrationError(error)
+      });
+    } else {
+      this.http.post<boolean>(`${this.apiUrl}/register`, userData).subscribe({
+        next: (success) => this.handleRegistrationResponse(success),
+        error: (error) => this.handleRegistrationError(error)
+      });
+    }
   }
 
   resetForm(): void {
     if (confirm('¿Estás seguro de que quieres limpiar el formulario?')) {
       this.registerForm.reset({
-        pais: 'es',
+        pais: 'España',
         terminos: false
       });
+      this.selectedFile = null;
     }
+  }
+
+  onFileSelected(event: any): void {
+      this.selectedFile = event.target.files[0];
+  }
+
+  private registerWithImage(userData: any, imageFile: File): Observable<boolean> {
+    const formData = new FormData();
+
+      // Usa new Blob() para el JSON y especifica el tipo de contenido
+      const userDataBlob = new Blob([JSON.stringify(userData)], { type: 'application/json' });
+      formData.append('userData', userDataBlob);
+      formData.append('profileImage', imageFile);
+
+      return this.http.post<boolean>(`${this.apiUrl}/register-with-image`, formData);
+  }
+
+  private handleRegistrationResponse(success: boolean): void {
+    this.isLoading = false;
+    if (success) {
+      alert('Usuario registrado correctamente');
+      this.router.navigate(['/login']);
+    } else {
+      this.errorMessage = 'Error al registrar el usuario';
+    }
+  }
+
+  private handleRegistrationError(error: any): void {
+    this.isLoading = false;
+    this.errorMessage = 'Error al conectar con el servidor';
+    console.error('Error de registro:', error);
   }
 }

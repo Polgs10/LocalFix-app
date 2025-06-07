@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserProfile, UserProfileLocation, UserProfileRating } from '../model/user.model';
+
 
 @Component({
   selector: 'app-user-profile',
@@ -12,6 +13,8 @@ import { UserProfile, UserProfileLocation, UserProfileRating } from '../model/us
   styleUrl: './user-profile.component.css'
 })
 export class UserProfileComponent {
+  @ViewChild('fileInput') fileInput!: ElementRef;
+
   isEditMode = false;
   originalValues: any = {};
   document: File | null = null;
@@ -28,6 +31,8 @@ export class UserProfileComponent {
   newPassword: string = '';
   confirmPassword: string = '';
 
+  private baseImageUrl = "http://localhost:8080/uploads/";
+
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
@@ -43,6 +48,10 @@ export class UserProfileComponent {
       }
     });
 
+  }
+
+  triggerFileInput() {
+    this.fileInput.nativeElement.click();
   }
 
   handleProfileUpdate() {
@@ -115,7 +124,22 @@ export class UserProfileComponent {
       .subscribe({
         next: (userProfile) => {
           this.userProfile = userProfile;
-          console.log('User Profile Details:', this.userProfile);
+          this.http.get(`http://localhost:8080/api/users/${this.userProfileId}/profile-image`, { responseType: 'text' })
+          .subscribe({
+            next: (imagePath: string) => {
+              if (this.userProfile) {
+                this.userProfile.profileImagePath = imagePath
+                  ? this.baseImageUrl + imagePath
+                  : 'https://via.placeholder.com/120x120';
+              }
+            },
+            error: (err) => {
+              console.error('Error loading profile image', err);
+              if (this.userProfile) {
+                this.userProfile.profileImagePath = 'https://via.placeholder.com/120x120';
+              }
+            }
+  });
         },
         error: (err) => {
           console.error('Error loading user details', err);
@@ -166,13 +190,28 @@ export class UserProfileComponent {
 
   handleImageUpload(event: any) {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        // Aquí puedes manejar la nueva imagen de perfil
-        // Por ejemplo, actualizar userData.profileImage
-      };
-      reader.readAsDataURL(file);
+    if (file && this.userProfileId) {
+        const formData = new FormData();
+        formData.append('profileImage', file);
+
+        this.http.put<boolean>(
+            `http://localhost:8080/api/users/${this.userProfileId}/update-profile-image`,
+            formData
+        ).subscribe({
+            next: (success) => {
+                if (success) {
+                    // Recargar la imagen de perfil
+                    this.loadUserProfileDetails();
+                    alert('Imagen de perfil actualizada correctamente');
+                } else {
+                    alert('Error al actualizar la imagen de perfil');
+                }
+            },
+            error: (err) => {
+                console.error('Error updating profile image', err);
+                alert('Error al actualizar la imagen de perfil');
+            }
+        });
     }
   }
 
