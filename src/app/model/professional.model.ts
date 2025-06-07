@@ -49,4 +49,5 @@ export interface ProfessionalRating {
   score: number;
   comment: string;
   date: string;
+  profileImagePath: string;
 }

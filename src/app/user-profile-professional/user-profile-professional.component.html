@@ -411,9 +411,15 @@
                 <div class="border-b border-gray-200 pb-6" *ngFor="let rating of professionalRatings">
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                                {{rating.username.charAt(0).toUpperCase()}}
-                            </div>
+                            <div class="w-10 h-10 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center text-white font-semibold">
+                            <img *ngIf="rating.profileImagePath; else fallbackInitial"
+                                [src]="'http://localhost:8080/uploads/' + rating.profileImagePath"
+                                alt="{{ rating.username }}"
+                                class="w-full h-full object-cover">
+                            <ng-template #fallbackInitial>
+                              <span class="text-blue-700">{{rating.username | slice:0:1 | uppercase}}</span>
+                            </ng-template>
+                          </div>
                         </div>
                         <div class="flex-1">
                             <div class="flex items-center justify-between mb-2">

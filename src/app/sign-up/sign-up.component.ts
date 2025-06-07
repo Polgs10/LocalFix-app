@@ -18,6 +18,7 @@ export class SignUpComponent {
   errorMessage: string | null = null;
   isLoading = false;
   selectedFile: File | null = null;
+  imagePreview: string = 'https://via.placeholder.com/120x120?text=Logo';
   private apiUrl = 'http://localhost:8080/api/users';
 
   constructor(
@@ -104,7 +105,17 @@ export class SignUpComponent {
   }
 
   onFileSelected(event: any): void {
-      this.selectedFile = event.target.files[0];
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+
+      // Mostrar vista previa de la imagen
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   private registerWithImage(userData: any, imageFile: File): Observable<boolean> {
