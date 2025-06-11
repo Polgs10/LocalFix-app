@@ -4,11 +4,12 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserProfile, UserProfileLocation, UserProfileRating } from '../model/user.model';
+import { FooterComponent } from "../layout/footer/footer.component";
 
 
 @Component({
   selector: 'app-user-profile',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FooterComponent],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css'
 })

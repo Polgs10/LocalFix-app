@@ -18,7 +18,7 @@
                     </a>
                     <h1 class="text-xl font-semibold text-gray-800">Mi Perfil</h1>
                 </div>
-                <div class="text-2xl font-bold text-blue-600">Local Fix</div>
+                <img src="https://res.cloudinary.com/dfo0yi2me/image/upload/v1749677690/Dise%C3%B1o_sin_t%C3%ADtulo-removebg-preview_kwpb5r.png" class="h-22 me-3" alt="Logo" />
             </div>
         </div>
     </header>
@@ -398,7 +398,7 @@
                 <div *ngFor="let rating of userProfileRatings" class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-200">
                     <div class="flex items-center justify-between mb-3">
                         <a href="#" class="text-lg font-semibold text-blue-600 hover:text-blue-800 transition duration-200">{{ rating.businessName }}</a>
-                        <span class="text-sm text-gray-500">{{ rating.date | date:'d \'de\' MMMM, yyyy' }}</span>
+                        <span class="text-sm text-gray-500">{{rating.date | date}}</span>
                     </div>
                     <div class="flex items-center mb-3">
                         <div class="flex text-yellow-400 mr-2">
@@ -414,3 +414,5 @@
         </div>
     </main>
 </div>
+
+<app-footer></app-footer>

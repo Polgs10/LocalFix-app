@@ -5,10 +5,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Service } from '../model/service.model';
+import { FooterComponent } from "../layout/footer/footer.component";
 
 @Component({
   selector: 'app-user-profile-professional',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FooterComponent],
   templateUrl: './user-profile-professional.component.html',
   styleUrl: './user-profile-professional.component.css'
 })
