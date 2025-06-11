@@ -517,17 +517,17 @@
 
                         <div class="mt-6 flex justify-end space-x-3">
                             <button
+                                type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                {{isEditingService ? 'Guardar Cambios' : 'Añadir Servicio'}}
+                            </button>
+                            <button
                                 type="button"
                                 (click)="showServiceModal = false"
                                 class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                {{isEditingService ? 'Guardar Cambios' : 'Añadir Servicio'}}
                             </button>
                         </div>
                     </form>
@@ -673,17 +673,17 @@
 
                         <div class="mt-6 flex justify-end space-x-3">
                             <button
+                                type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                {{isEditingLocation ? 'Guardar Cambios' : 'Añadir Ubicación'}}
+                            </button>
+                            <button
                                 type="button"
                                 (click)="showLocationModal = false"
                                 class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                {{isEditingLocation ? 'Guardar Cambios' : 'Añadir Ubicación'}}
                             </button>
                         </div>
                     </form>

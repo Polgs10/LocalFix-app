@@ -59,7 +59,7 @@
     </div>
 
 
-    <div class="mt-4 flex space-x-4">
+    <div class="mt-4 flex justify-center space-x-4">
       <button (click)="applyFilters()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
         Aplicar Filtros
       </button>
@@ -78,7 +78,7 @@
   <div *ngIf="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     <div *ngFor="let prof of professionals"
         class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 cursor-pointer"
-        (click)="viewProfessionalDetails(prof.businessName)"> <!-- Añadir click handler -->
+        (click)="viewProfessionalDetails(prof.businessName)">
       <img [src]="'http://localhost:8080/uploads/' + prof.businessImagePath" [alt]="prof.businessName" class="w-full h-48 object-cover">
       <div class="p-4">
         <h3 class="text-lg font-semibold text-gray-800 mb-1">{{prof.businessName}}</h3>

@@ -5,7 +5,6 @@ import { ProfessionalDetails, ProfessionalLocation, ProfessionalRating, Professi
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NewRating } from '../model/rating.model';
-import { UserProfile } from '../model/user.model';
 
 @Component({
   selector: 'app-details-professional',
