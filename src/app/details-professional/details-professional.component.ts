@@ -5,6 +5,8 @@ import { ProfessionalDetails, ProfessionalLocation, ProfessionalRating, Professi
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NewRating } from '../model/rating.model';
+import { AuthService } from '../auth.service';
+import { ApiResponse } from '../model/ApiResponse.model';
 
 @Component({
   selector: 'app-details-professional',
@@ -19,7 +21,7 @@ export class DetailsProfessionalComponent {
   professionalServices: ProfessionalService[] | null = null;
   professionalRatings: ProfessionalRating[] | null = null;
 
-  userProfileId: number | null = null;
+  user: any;
 
   newRating: NewRating | null = null;
 
@@ -30,23 +32,27 @@ export class DetailsProfessionalComponent {
   selectedRating = 0;
   showReviewModal = false;
   newReviewComment = '';
-  username: string | null = null;
   errorMessage: string | null = null;
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
+  showEmailModal = false;
+  isSendingEmail = false;
+  emailData = {
+    from: '',
+    to: '',
+    subject: '',
+    body: ''
+  };
+
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private route:
+    ActivatedRoute,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-
-    this.route.paramMap.subscribe(params => {
-      const username = params.get('username');
-      if (username) {
-        this.username = username;
-        this.loadUserId(username);
-      } else {
-        this.error = 'Professional not found';
-        this.isLoading = false;
-      }
-    });
+    this.user = this.authService.getCurrentUser();
 
     this.route.paramMap.subscribe(params => {
       const businessName = params.get('businessName');
@@ -58,68 +64,13 @@ export class DetailsProfessionalComponent {
         this.isLoading = false;
       }
     });
-
-  }
-
-  submitReview(): void {
-    if (!this.userProfileId || !this.professionalId || this.selectedRating === 0) {
-      this.errorMessage = 'Por favor, completa todos los campos requeridos';
-      return;
-    }
-
-  this.isLoading = true;
-
-  const newRating: NewRating = {
-    userId: this.userProfileId,
-    professionalId: this.professionalId,
-    score: this.selectedRating,
-    comment: this.newReviewComment
-  };
-
-  this.http.post<any>('http://localhost:8080/api/ratings/new/rating', newRating)
-    .subscribe({
-      next: (response) => {
-        this.closeReviewModal();
-        this.resetReviewForm();
-        // Recargar las valoraciones para mostrar la nueva
-        this.loadProfessionalRatings();
-        // Actualizar los detalles del profesional (para el promedio)
-        this.loadProfessionalDetails();
-      },
-      error: (error) => {
-        this.errorMessage = 'Error al enviar la valoración. Por favor, inténtalo de nuevo.';
-        console.error('Error submitting review:', error);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  resetReviewForm(): void {
-    this.selectedRating = 0;
-    this.newReviewComment = '';
-    this.errorMessage = null;
-    this.isLoading = false;
-  }
-
-  loadUserId(username: string): void {
-    this.http.get<number>(`http://localhost:8080/api/users/id/${username}`)
-      .subscribe({
-        next: (id) => {
-          this.userProfileId = id;
-        },
-        error: (err) => {
-          this.error = 'User not found';
-          this.isLoading = false;
-          console.error(err);
-        }
-      });
   }
 
   loadProfessionalId(businessName: string): void {
-    this.http.get<number>(`http://localhost:8080/api/professionals/${businessName}/id`)
+    this.http.get<ApiResponse<number>>(`http://localhost:8080/api/professionals/id/${businessName}`)
       .subscribe({
-        next: (id) => {
-          this.professionalId = id;
+        next: (res) => {
+          this.professionalId = res.data;
 
           this.loadProfessionalDetails();
           this.loadProfessionalLocations();
@@ -137,11 +88,10 @@ export class DetailsProfessionalComponent {
   loadProfessionalDetails(): void {
     if (!this.professionalId) return;
 
-    this.http.get<ProfessionalDetails>(`http://localhost:8080/api/professionals/${this.professionalId}/details`)
+    this.http.get<ApiResponse<ProfessionalDetails>>(`http://localhost:8080/api/professionals/details/${this.professionalId}`)
       .subscribe({
-        next: (data) => {
-          this.professional = data;
-          console.log(data);
+        next: (res) => {
+          this.professional = res.data;
         },
         error: (err) => {
           console.error('Error loading professional details', err);
@@ -152,11 +102,10 @@ export class DetailsProfessionalComponent {
   loadProfessionalLocations(): void {
     if (!this.professionalId) return;
 
-    this.http.get<ProfessionalLocation[]>(`http://localhost:8080/api/professional-locations/${this.professionalId}/locations`)
+    this.http.get<ApiResponse<ProfessionalLocation[]>>(`http://localhost:8080/api/professional-locations/locations/${this.professionalId}`)
       .subscribe({
-        next: (data) => {
-          this.professionalLocations = data;
-          console.log('Locations loaded:', data);
+        next: (res) => {
+          this.professionalLocations = res.data;
         },
         error: (err) => {
           console.error('Error loading locations', err);
@@ -166,10 +115,10 @@ export class DetailsProfessionalComponent {
 
   loadProfessionalServices(): void {
     if (!this.professionalId) return;
-    this.http.get<ProfessionalService[]>(`http://localhost:8080/api/services/${this.professionalId}/services`)
+    this.http.get<ApiResponse<ProfessionalService[]>>(`http://localhost:8080/api/services/services-professional/${this.professionalId}`)
       .subscribe({
-        next: (data) => {
-          this.professionalServices = data;
+        next: (res) => {
+          this.professionalServices = res.data;
         },
         error: (err) => {
           console.error('Error loading services', err);
@@ -179,10 +128,10 @@ export class DetailsProfessionalComponent {
 
   loadProfessionalRatings(): void {
     if (!this.professionalId) return;
-    this.http.get<ProfessionalRating[]>(`http://localhost:8080/api/ratings/${this.professionalId}/ratings`)
+    this.http.get<ApiResponse<ProfessionalRating[]>>(`http://localhost:8080/api/ratings/ratings/${this.professionalId}`)
       .subscribe({
-        next: (data) => {
-          this.professionalRatings = data;
+        next: (res) => {
+          this.professionalRatings = res.data;
           this.isLoading = false;
         },
         error: (err) => {
@@ -193,8 +142,64 @@ export class DetailsProfessionalComponent {
       });
   }
 
+  submitReview(): void {
+    if (!this.user.id || !this.professionalId || this.selectedRating === 0) {
+      this.errorMessage = 'Por favor, completa todos los campos requeridos';
+      return;
+    }
+
+    const newRating: NewRating = {
+      userId: this.user.id,
+      professionalId: this.professionalId,
+      score: this.selectedRating,
+      comment: this.newReviewComment
+    };
+
+    this.http.post<any>('http://localhost:8080/api/ratings/new/rating', newRating)
+      .subscribe({
+        next: (response) => {
+          this.closeReviewModal();
+          this.resetReviewForm();
+          this.loadProfessionalRatings();
+          this.loadProfessionalDetails();
+        },
+        error: (error) => {
+          this.errorMessage = 'Error al enviar la valoración. Por favor, inténtalo de nuevo.';
+          console.error('Error submitting review:', error);
+          this.isLoading = false;
+        }
+      });
+  }
+
+  sendEmail(): void {
+    if (!this.emailData.from || !this.emailData.to || !this.emailData.subject || !this.emailData.body) {
+      this.errorMessage = 'Por favor, completa todos los campos requeridos';
+      return;
+    }
+
+    this.isSendingEmail = true;
+
+    const subject = encodeURIComponent(this.emailData.subject);
+    const body = encodeURIComponent(
+      this.emailData.body +
+      `\n\nEnviado desde LocalFix por ${this.emailData.from}`
+    );
+
+    const mailtoLink = `mailto:${this.emailData.to}?subject=${subject}&body=${body}`;
+    window.location.href = mailtoLink;
+
+    this.closeEmailModal();
+  }
+
   goBack(): void {
-    this.router.navigate(['/layout', this.username]);
+    this.router.navigate(['/layout', this.user.username]);
+  }
+
+  resetReviewForm(): void {
+    this.selectedRating = 0;
+    this.newReviewComment = '';
+    this.errorMessage = null;
+    this.isLoading = false;
   }
 
   getSecondaryLocations(): ProfessionalLocation[] {
@@ -262,7 +267,7 @@ export class DetailsProfessionalComponent {
 
   getWhatsAppNumber(phone: string | undefined): string {
     if (!phone) return '';
-    // Eliminar espacios y caracteres no numéricos
+
     return phone.replace(/[^\d]/g, '');
   }
 
@@ -274,21 +279,11 @@ export class DetailsProfessionalComponent {
     this.selectedRating = rating;
   }
 
-
-
-  showEmailModal = false;
-  isSendingEmail = false;
-  emailData = {
-    from: '',
-    to: '', // Se establecerá con el email del profesional
-    subject: '',
-    body: ''
-  };
-
   openEmailModal(): void {
     this.showEmailModal = true;
-    // Establecer el email del profesional si está disponible
+
     if (this.professional?.email) {
+      this.emailData.from = this.user.email;
       this.emailData.to = this.professional.email;
     }
   }
@@ -300,32 +295,11 @@ export class DetailsProfessionalComponent {
 
   resetEmailForm(): void {
     this.emailData = {
-      from: '',
+      from: this.user?.email || '',
       to: this.professional?.email || '',
       subject: '',
       body: ''
     };
     this.isSendingEmail = false;
-  }
-
-  sendEmail(): void {
-    if (!this.emailData.from || !this.emailData.to || !this.emailData.subject || !this.emailData.body) {
-      this.errorMessage = 'Por favor, completa todos los campos requeridos';
-      return;
-    }
-
-    this.isSendingEmail = true;
-
-    // Opción 1: Abrir el cliente de email del usuario (como está actualmente)
-    const subject = encodeURIComponent(this.emailData.subject);
-    const body = encodeURIComponent(
-      this.emailData.body +
-      `\n\nEnviado desde LocalFix por ${this.emailData.from}`
-    );
-
-    const mailtoLink = `mailto:${this.emailData.to}?subject=${subject}&body=${body}`;
-    window.location.href = mailtoLink;
-
-    this.closeEmailModal();
   }
 }

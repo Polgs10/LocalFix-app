@@ -19,7 +19,6 @@ export class HeaderComponent {
   ngOnInit(): void {
     this.route.parent?.paramMap.subscribe(params => {
       this.username = params.get('username');
-      console.log('Username in header:', this.username);
     });
   }
 
