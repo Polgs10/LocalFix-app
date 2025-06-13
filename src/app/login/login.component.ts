@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth.service';
 
@@ -17,12 +16,11 @@ export class LoginComponent {
   showPassword = false;
   errorMessage: string | null = null;
   isLoading = false;
+  user: any;
 
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
-    private router: Router,
     private authService: AuthService
   ) {
     this.loginForm = this.fb.group({
@@ -30,7 +28,6 @@ export class LoginComponent {
       password: ['', Validators.required]
     });
   }
-  user: any;
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
@@ -53,8 +50,6 @@ export class LoginComponent {
     this.authService.login(email, password).subscribe({
       next: () => {
         this.isLoading = false;
-        console.log(this.user);
-        this.router.navigate(['/layout', this.user?.username]); // o con username si lo necesitas
       },
       error: (error) => {
         this.errorMessage = 'Credenciales incorrectas o error de servidor';

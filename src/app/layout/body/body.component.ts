@@ -2,9 +2,10 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { ProfessionalCard } from '../../model/professional.model';
 import { ApiResponse } from '../../model/ApiResponse.model';
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-body',
@@ -16,7 +17,7 @@ export class BodyComponent {
   categories: string[] = [];
   provinces: string[] = [];
   professionals: ProfessionalCard[] = [];
-  username: string | null = null;
+  user: any;
   filters = {
     category: '',
     province: '',
@@ -27,20 +28,15 @@ export class BodyComponent {
   error: string | null = null;
   isLoading = true;
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
 
-    this.route.paramMap.subscribe(params => {
-      const username = params.get('username');
-      if (username) {
-        this.username = username;
-        console.log('Username from route:', this.username);
-      } else {
-        this.error = 'Professional not found';
-        this.isLoading = false;
-      }
-    });
+    this.user = this.authService.getCurrentUser();
 
     this.loadInitialData();
   }
@@ -52,8 +48,8 @@ export class BodyComponent {
       error: (err) => console.error('Error loading categories', err)
     })
 
-    this.http.get<string[]>('http://localhost:8080/api/professional-locations/provinces').subscribe({
-      next: (data) => this.provinces = data,
+    this.http.get<ApiResponse<string[]>>('http://localhost:8080/api/professional-locations/provinces').subscribe({
+      next: (res) => this.provinces = res.data,
       error: (err) => console.error('Error loading categories', err)
     });
 
@@ -68,13 +64,12 @@ export class BodyComponent {
     if (this.filters.province) params.province = this.filters.province;
     if (this.filters.experience) params.experience = this.filters.experience;
     if (this.filters.minRating) params.minRating = this.filters.minRating;
-    params.username = this.username
+    params.username = this.user.username
 
-    this.http.get<ProfessionalCard[]>('http://localhost:8080/api/professionals', { params }).subscribe({
-      next: (data) => {
-        this.professionals = data.map(prof => ({
+    this.http.get<ApiResponse<ProfessionalCard[]>>('http://localhost:8080/api/professionals', { params }).subscribe({
+      next: (res) => {
+        this.professionals = res.data.map(prof => ({
           ...prof,
-          image: this.getProfessionalImage(prof.guild)
         }));
         this.isLoading = false;
       },
@@ -100,17 +95,6 @@ export class BodyComponent {
     this.loadProfessionals();
   }
 
-  private getProfessionalImage(guild: string): string {
-    const images: {[key: string]: string} = {
-      'Carpintero': 'carpenter.jpg',
-      'Fontanero': 'plumber.jpg',
-      'Electricista': 'electrician.jpg',
-      'Cerrajero': 'locksmith.jpg',
-      'Albañil': 'builder.jpg'
-    };
-    return images[guild] || 'professional-default.jpg';
-  }
-
   getRatingStars(rating: number): number[] {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -122,7 +106,7 @@ export class BodyComponent {
   }
 
   viewProfessionalDetails(professionalUsername: string): void {
-    this.router.navigate([`/details-professional/${this.username}/${professionalUsername}`]);
+    this.router.navigate([`/details-professional/${this.user.username}/${professionalUsername}`]);
   }
 
   getStars(score: number): string[] {
