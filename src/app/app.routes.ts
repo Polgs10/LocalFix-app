@@ -8,17 +8,20 @@ import { DETAILS_PROFESSIONAL } from './details-professional/details-professiona
 import { USER_PROFILE_PROFESSIONAL } from './user-profile-professional/user-profile-routing';
 import { PAYMENT } from './payment/payment-routing';
 import { REGISTER_PROFESSIONAL } from './register-professional/register-professional-routing';
+import { AuthGuard } from './auth.guard';
 
 
 export const routes: Routes = [
   { path: 'login', children: LOGIN_ROUTES },
   { path: 'register', children: SIGNUP},
-  { path: 'layout/:username', children: LAYOUT_ROUTES },
-  { path: 'details-professional/:username/:businessName', children: DETAILS_PROFESSIONAL},
-  { path: 'user/profile/:username', children: USER_PROFILE },
-  { path: 'user/professional-profile/:username', children: USER_PROFILE_PROFESSIONAL },
-  { path: 'user/professional-profile/payment/:username', children: PAYMENT },
-  { path: 'user/register/professional-profile/:username', children: REGISTER_PROFESSIONAL },
+
+  { path: 'layout/:username', canActivate: [AuthGuard], children: LAYOUT_ROUTES },
+  { path: 'details-professional/:username/:businessName', canActivate: [AuthGuard], children: DETAILS_PROFESSIONAL},
+  { path: 'user/profile/:username', canActivate: [AuthGuard], children: USER_PROFILE },
+  { path: 'user/professional-profile/:username', canActivate: [AuthGuard], children: USER_PROFILE_PROFESSIONAL },
+  { path: 'user/professional-profile/payment/:username', canActivate: [AuthGuard], children: PAYMENT },
+  { path: 'user/register/professional-profile/:username', canActivate: [AuthGuard], children: REGISTER_PROFESSIONAL },
+
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];

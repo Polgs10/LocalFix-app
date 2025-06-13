@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-header',
@@ -13,7 +14,7 @@ export class HeaderComponent {
   isMenuOpen = false;
   username: string | null = null;
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(private route: ActivatedRoute, private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.route.parent?.paramMap.subscribe(params => {
@@ -31,6 +32,6 @@ export class HeaderComponent {
   }
 
   logout(): void {
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 }

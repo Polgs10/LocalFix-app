@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../auth.service';
 
 @Component({
   standalone: true,
@@ -13,21 +14,26 @@ import { CommonModule } from '@angular/common';
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  username: string | null = null;
-  email: string | null = null;
   showPassword = false;
   errorMessage: string | null = null;
   isLoading = false;
 
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+  }
+  user: any;
+
+  ngOnInit(): void {
+    this.user = this.authService.getCurrentUser();
   }
 
   togglePasswordVisibility(): void {
@@ -42,44 +48,19 @@ export class LoginComponent {
     this.isLoading = true;
     this.errorMessage = null;
 
-    const credentials = {
-      email: this.loginForm.value.email,
-      password: this.loginForm.value.password
-    };
+    const { email, password } = this.loginForm.value;
 
-    this.email = credentials.email;
-
-    this.http.post<any>('http://localhost:8080/api/users/login', credentials)
-      .subscribe({
-        next: (isValid) => {
-          if (isValid) {
-            this.http.get(`http://localhost:8080/api/users/username/${this.email}`, { responseType: 'text' as 'text' })
-              .subscribe({
-                next: (username) => {
-                  if (username) {
-                    this.username = username;
-                    this.router.navigate(['/layout', this.username]);
-                  } else {
-                    this.errorMessage = 'User not found';
-                  }
-                  this.isLoading = false;
-                },
-                error: (error) => {
-                  this.errorMessage = 'Error to fetch username';
-                  this.isLoading = false;
-                  console.error('Error to fetch username', error);
-                }
-              });
-          } else {
-            this.errorMessage = 'Invalid email or password';
-            this.isLoading = false;
-          }
-        },
-        error: (error) => {
-          this.errorMessage = 'Error to connect to the server';
-          this.isLoading = false;
-          console.error('Error authentication:', error);
-        }
-      });
+    this.authService.login(email, password).subscribe({
+      next: () => {
+        this.isLoading = false;
+        console.log(this.user);
+        this.router.navigate(['/layout', this.user?.username]); // o con username si lo necesitas
+      },
+      error: (error) => {
+        this.errorMessage = 'Credenciales incorrectas o error de servidor';
+        this.isLoading = false;
+        console.error('Login error:', error);
+      }
+    });
   }
 }
