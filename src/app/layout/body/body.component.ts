@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProfessionalCard } from '../../model/professional.model';
+import { ApiResponse } from '../../model/ApiResponse.model';
 
 @Component({
   selector: 'app-body',
@@ -45,10 +46,11 @@ export class BodyComponent {
   }
 
   loadInitialData(): void {
-    this.http.get<string[]>('http://localhost:8080/api/guilds/categories').subscribe({
-      next: (data) => this.categories = data,
+    this.http.get<ApiResponse<string[]>>('http://localhost:8080/api/guilds/categories')
+    .subscribe({
+      next: (res) => this.categories = res.data,
       error: (err) => console.error('Error loading categories', err)
-    });
+    })
 
     this.http.get<string[]>('http://localhost:8080/api/professional-locations/provinces').subscribe({
       next: (data) => this.provinces = data,

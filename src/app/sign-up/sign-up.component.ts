@@ -109,7 +109,6 @@ export class SignUpComponent {
     if (file) {
       this.selectedFile = file;
 
-      // Mostrar vista previa de la imagen
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imagePreview = e.target.result;
@@ -121,7 +120,6 @@ export class SignUpComponent {
   private registerWithImage(userData: any, imageFile: File): Observable<boolean> {
     const formData = new FormData();
 
-      // Usa new Blob() para el JSON y especifica el tipo de contenido
       const userDataBlob = new Blob([JSON.stringify(userData)], { type: 'application/json' });
       formData.append('userData', userDataBlob);
       formData.append('profileImage', imageFile);
