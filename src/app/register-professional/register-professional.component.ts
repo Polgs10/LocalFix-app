@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { ApiResponse } from '../model/ApiResponse.model';
+import { debounceTime, distinctUntilChanged, Observable, of, Subject, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-register-professional',
@@ -14,13 +15,18 @@ import { ApiResponse } from '../model/ApiResponse.model';
   styleUrl: './register-professional.component.css'
 })
 export class RegisterProfessionalComponent {
-
   user: any;
   error: string | null = null;
   isLoading = true;
   guilds: string[] = [];
   selectedFile: File | null = null;
   imagePreview: string = 'https://via.placeholder.com/120x120?text=Logo';
+
+  // Variables para verificación en tiempo real
+  businessNameExists = false;
+  emailExists = false;
+  checkingBusinessName = false;
+  checkingEmail = false;
 
   professionalData = {
     businessName: '',
@@ -39,6 +45,11 @@ export class RegisterProfessionalComponent {
     isPrimary: true
   };
 
+
+  public businessNameSubject = new Subject<string>();
+  public emailSubject = new Subject<string>();
+  private apiUrl = 'http://localhost:8080/api/professionals';
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -49,6 +60,43 @@ export class RegisterProfessionalComponent {
     this.user = this.authService.getCurrentUser();
     this.isLoading = false;
     this.loadGuilds();
+
+      // Verificación en tiempo real para business name
+      this.businessNameSubject.pipe(
+    debounceTime(500),
+    distinctUntilChanged(),
+    tap(() => this.checkingBusinessName = true),
+    switchMap(name => this.checkBusinessNameAvailability(name))
+  ).subscribe({
+    next: exists => {
+      this.businessNameExists = exists;
+      this.checkingBusinessName = false;
+    },
+    error: () => this.checkingBusinessName = false
+  });
+
+  this.emailSubject.pipe(
+    debounceTime(500),
+    distinctUntilChanged(),
+    tap(() => this.checkingEmail = true),
+    switchMap(email => this.checkEmailAvailability(email))
+  ).subscribe({
+    next: exists => {
+      this.emailExists = exists;
+      this.checkingEmail = false;
+    },
+    error: () => this.checkingEmail = false
+  });
+  }
+
+  private checkBusinessNameAvailability(businessName: string): Observable<boolean> {
+    if (!businessName) return of(false);
+    return this.http.get<boolean>(`${this.apiUrl}/check-business-name/${businessName}`);
+  }
+
+  private checkEmailAvailability(email: string): Observable<boolean> {
+    if (!email) return of(false);
+    return this.http.get<boolean>(`${this.apiUrl}/check-email/${email}`);
   }
 
   goBack() {
@@ -67,6 +115,11 @@ export class RegisterProfessionalComponent {
     if (!this.user.username || !this.user.id) {
       this.error = 'User information not available';
       this.isLoading = false;
+      return;
+    }
+
+    if (this.businessNameExists || this.emailExists) {
+      this.error = 'Por favor, corrija los campos marcados';
       return;
     }
 
@@ -98,7 +151,7 @@ export class RegisterProfessionalComponent {
       formData.append('professionalData', JSON.stringify(requestData));
       formData.append('businessImage', this.selectedFile);
 
-      this.http.post<ApiResponse<boolean>>('http://localhost:8080/api/professionals/register-with-image', formData)
+      this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/register-with-image`, formData)
         .subscribe({
           next: (res) => {
             if (res) {
@@ -112,7 +165,7 @@ export class RegisterProfessionalComponent {
           }
         });
     } else {
-      this.http.post<ApiResponse<boolean>>('http://localhost:8080/api/professionals', requestData)
+      this.http.post<ApiResponse<boolean>>(this.apiUrl, requestData)
         .subscribe({
           next: (res) => {
             if (res) {
