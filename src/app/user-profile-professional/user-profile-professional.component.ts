@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ProfessionalDetails, ProfessionalLocation, ProfessionalRating, ProfessionalService } from '../model/professional.model';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Service } from '../model/service.model';
@@ -35,44 +35,45 @@ export class UserProfileProfessionalComponent {
 
   originalImageUrl: string = '';
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
+  showLocationModal = false;
+  isEditingLocation = false;
+  editingLocationId: number | null = null;
+
+  newLocation: ProfessionalLocation = {
+    id: 0,
+    address: '',
+    city: '',
+    province: '',
+    postalCode: '',
+    country: '',
+    landlinePhone: '',
+    mobilePhone: '',
+    businessHours: '',
+    primary: false
+  };
+
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private authService: AuthService) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
-        this.isProfessional(this.user.username);
-        this.loadGuilds();
+    this.isProfessional(this.user.username);
+    this.loadGuilds();
   }
 
-  getStars(rating: number): string[] {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
 
-    for (let i = 0; i < fullStars; i++) {
-      stars.push('fas fa-star');
-    }
-
-    if (hasHalfStar) {
-      stars.push('fas fa-star-half-alt');
-    }
-
-    const emptyStars = 5 - stars.length;
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push('far fa-star');
-    }
-
-    return stars;
-  }
 
   viewPayment(username: string): void {
     this.router.navigate([`user/professional-profile/payment/${username}`]);
   }
 
   isProfessional(username: string): void {
-    this.http.get<boolean>(`http://localhost:8080/api/users/professional/${username}`)
+    this.http.get<ApiResponse<boolean>>(`http://localhost:8080/api/users/professional/${username}`)
       .subscribe({
-        next: (isProfessional) => {
-          if (isProfessional) {
+        next: (res) => {
+          if (res.data === true) {
             this.loadProfessionalId(username);
           } else {
             if (this.user.username) {
@@ -97,10 +98,10 @@ export class UserProfileProfessionalComponent {
   }
 
   loadProfessionalId(username: string): void {
-    this.http.get<number>(`http://localhost:8080/api/users/professional/id/${username}`)
+    this.http.get<ApiResponse<number>>(`http://localhost:8080/api/users/professional/id/${username}`)
       .subscribe({
-        next: (id) => {
-          this.professionalId = id;
+        next: (res) => {
+          this.professionalId = res.data;
           this.loadProfessionalDetails();
           this.loadProfessionalLocations();
           this.loadProfessionalServices();
@@ -192,20 +193,7 @@ export class UserProfileProfessionalComponent {
       });
   }
 
-  toggleEditMode(): void {
-    this.isEditMode = !this.isEditMode;
-    if (!this.isEditMode) {
-        this.cancelProfileEdit();
-    }
-  }
 
-  cancelProfileEdit(): void {
-    this.isEditMode = false;
-    if (this.originalProfessional && this.professional) {
-        this.professional = {...this.originalProfessional};
-        this.professional.imageUrl = this.originalImageUrl;
-    }
-  }
 
   handleProfileUpdate(event: Event): void {
     event.preventDefault();
@@ -226,7 +214,7 @@ export class UserProfileProfessionalComponent {
           this.originalProfessional = {...this.professional!};
           this.isEditMode = false;
           alert('Perfil actualizado correctamente');
-          // Recargar los datos para asegurar consistencia
+
           this.loadProfessionalDetails();
         },
         error: (err) => {
@@ -290,7 +278,7 @@ export class UserProfileProfessionalComponent {
   }
 
   setPrimaryLocation(locationId: number): void {
-    console.log('Location ID:', locationId); // Verifica que tenga un valor válido
+    console.log('Location ID:', locationId);
     if (!locationId) {
       alert('Error: ID de ubicación no válido');
       return;
@@ -400,32 +388,13 @@ export class UserProfileProfessionalComponent {
     }
   }
 
-  showLocationModal = false;
-  isEditingLocation = false;
-  editingLocationId: number | null = null;
-
-  newLocation: ProfessionalLocation = {
-    id: 0,
-    address: '',
-    city: '',
-    province: '',
-    postalCode: '',
-    country: '',
-    landlinePhone: '',
-    mobilePhone: '',
-    businessHours: '',
-    primary: false
-  };
-
   showLocationModall(location?: ProfessionalLocation): void {
     this.showLocationModal = true;
     if (location) {
-      // Modo edición
       this.isEditingLocation = true;
       this.editingLocationId = location.id;
       this.newLocation = {...location};
     } else {
-      // Modo creación
       this.isEditingLocation = false;
       this.editingLocationId = null;
       this.newLocation = {
@@ -444,7 +413,6 @@ export class UserProfileProfessionalComponent {
   }
 
   saveLocation(): void {
-  // Validar que todos los campos requeridos están completos
     if (!this.newLocation.address || !this.newLocation.city ||
         !this.newLocation.province || !this.newLocation.postalCode ||
         !this.newLocation.country || !this.newLocation.mobilePhone ||
@@ -453,20 +421,17 @@ export class UserProfileProfessionalComponent {
       return;
     }
 
-    // Resto de tu lógica de guardado...
     if (!this.professionalId) return;
 
     if (this.isEditingLocation && this.editingLocationId) {
 
       const originalLocation = this.professionalLocations.find(loc => loc.id === this.editingLocationId);
 
-      // Actualizar ubicación existente - incluir el campo primary
       const updatedLocation = {
         ...this.newLocation,
         isPrimary: originalLocation ? originalLocation.primary : false
       };
 
-      // Actualizar ubicación existente
       this.http.put(`http://localhost:8080/api/professional-locations/${this.editingLocationId}`, updatedLocation)
         .subscribe({
           next: () => {
@@ -479,7 +444,6 @@ export class UserProfileProfessionalComponent {
           }
         });
     } else {
-      // Crear nueva ubicación
       this.http.post(`http://localhost:8080/api/professional-locations/${this.professionalId}`, this.newLocation).subscribe({
         next: () => {
           this.loadProfessionalLocations();
@@ -514,6 +478,42 @@ export class UserProfileProfessionalComponent {
             alert('Error al eliminar la ubicación');
           }
         });
+    }
+  }
+
+  getStars(rating: number): string[] {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push('fas fa-star');
+    }
+
+    if (hasHalfStar) {
+      stars.push('fas fa-star-half-alt');
+    }
+
+    const emptyStars = 5 - stars.length;
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push('far fa-star');
+    }
+
+    return stars;
+  }
+
+  toggleEditMode(): void {
+    this.isEditMode = !this.isEditMode;
+    if (!this.isEditMode) {
+        this.cancelProfileEdit();
+    }
+  }
+
+  cancelProfileEdit(): void {
+    this.isEditMode = false;
+    if (this.originalProfessional && this.professional) {
+        this.professional = {...this.originalProfessional};
+        this.professional.imageUrl = this.originalImageUrl;
     }
   }
 }

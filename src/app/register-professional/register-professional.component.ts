@@ -98,10 +98,10 @@ export class RegisterProfessionalComponent {
       formData.append('professionalData', JSON.stringify(requestData));
       formData.append('businessImage', this.selectedFile);
 
-      this.http.post<boolean>('http://localhost:8080/api/professionals/register-with-image', formData)
+      this.http.post<ApiResponse<boolean>>('http://localhost:8080/api/professionals/register-with-image', formData)
         .subscribe({
-          next: (isCreated) => {
-            if (isCreated) {
+          next: (res) => {
+            if (res) {
               this.router.navigate(['/user/professional-profile/', this.user.username]);
             }
           },
@@ -112,10 +112,10 @@ export class RegisterProfessionalComponent {
           }
         });
     } else {
-      this.http.post<boolean>('http://localhost:8080/api/professionals', requestData)
+      this.http.post<ApiResponse<boolean>>('http://localhost:8080/api/professionals', requestData)
         .subscribe({
-          next: (isCreated) => {
-            if (isCreated) {
+          next: (res) => {
+            if (res) {
               this.router.navigate(['/user/professional-profile/', this.user.username]);
             }
           },
