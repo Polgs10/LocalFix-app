@@ -52,7 +52,7 @@ export class LoginComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = 'Credenciales incorrectas o error de servidor';
+        this.errorMessage = 'Credenciales incorrectas';
         this.isLoading = false;
         console.error('Login error:', error);
       }
