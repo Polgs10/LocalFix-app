@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Observable, of, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-sign-up',
@@ -19,6 +19,12 @@ export class SignUpComponent {
   isLoading = false;
   selectedFile: File | null = null;
   imagePreview: string = 'https://via.placeholder.com/120x120?text=Logo';
+
+  usernameExists = false;
+  emailExists = false;
+  checkingUsername = false;
+  checkingEmail = false;
+
   private apiUrl = 'http://localhost:8080/api/users';
 
   constructor(
@@ -42,7 +48,51 @@ export class SignUpComponent {
       pais: ['España', Validators.required],
       terminos: [false, Validators.requiredTrue]
     });
+
+    this.registerForm.get('username')?.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      tap(() => this.checkingUsername = true),
+      switchMap(username => this.checkUsernameAvailability(username))
+    ).subscribe({
+      next: (exists) => {
+        this.usernameExists = exists;
+        this.checkingUsername = false;
+        if (exists) {
+          this.registerForm.get('username')?.setErrors({ notUnique: true });
+        }
+      },
+      error: () => this.checkingUsername = false
+    });
+
+    // Validación en tiempo real para email
+    this.registerForm.get('email')?.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      tap(() => this.checkingEmail = true),
+      switchMap(email => this.checkEmailAvailability(email))
+    ).subscribe({
+      next: (exists) => {
+        this.emailExists = exists;
+        this.checkingEmail = false;
+        if (exists) {
+          this.registerForm.get('email')?.setErrors({ notUnique: true });
+        }
+      },
+      error: () => this.checkingEmail = false
+    });
   }
+
+  private checkUsernameAvailability(username: string): Observable<boolean> {
+    if (!username) return of(false);
+    return this.http.get<boolean>(`${this.apiUrl}/check-username/${username}`);
+  }
+
+  private checkEmailAvailability(email: string): Observable<boolean> {
+    if (!email) return of(false);
+    return this.http.get<boolean>(`${this.apiUrl}/check-email/${email}`);
+  }
+
 
   onSubmit(): void {
     if (this.registerForm.invalid) {
