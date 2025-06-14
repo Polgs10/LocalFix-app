@@ -132,14 +132,14 @@ export class UserProfileProfessionalComponent {
                   this.professional.imageUrl = imagePath
                     ? this.baseImageUrl + imagePath
                     : 'https://via.placeholder.com/120x120';
-                  this.originalImageUrl = this.professional.imageUrl;
+                  this.originalImageUrl = this.professional.imageUrl; // Guarda la URL original
                 }
               },
               error: (err) => {
                 console.error('Error loading business image', err);
                 if (this.professional) {
                   this.professional.imageUrl = 'https://via.placeholder.com/120x120';
-                  this.originalImageUrl = this.professional.imageUrl;
+                  this.originalImageUrl = this.professional.imageUrl; // Guarda la URL original incluso si hay error
                 }
               }
             });
