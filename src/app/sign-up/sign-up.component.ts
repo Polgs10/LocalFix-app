@@ -39,17 +39,9 @@ export class SignUpComponent {
       ciudad: ['', Validators.required],
       provincia: ['', Validators.required],
       codigoPostal: ['', [Validators.required, Validators.pattern('[0-9]{5}')]],
-      pais: ['es', Validators.required],
+      pais: ['España', Validators.required],
       terminos: [false, Validators.requiredTrue]
     });
-  }
-
-  togglePasswordVisibility(field: string): void {
-    if (field === 'password') {
-      this.showPassword = !this.showPassword;
-    } else {
-      this.showConfirmPassword = !this.showConfirmPassword;
-    }
   }
 
   onSubmit(): void {
@@ -94,29 +86,6 @@ export class SignUpComponent {
     }
   }
 
-  resetForm(): void {
-    if (confirm('¿Estás seguro de que quieres limpiar el formulario?')) {
-      this.registerForm.reset({
-        pais: 'España',
-        terminos: false
-      });
-      this.selectedFile = null;
-    }
-  }
-
-  onFileSelected(event: any): void {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.imagePreview = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
   private registerWithImage(userData: any, imageFile: File): Observable<boolean> {
     const formData = new FormData();
 
@@ -141,5 +110,36 @@ export class SignUpComponent {
     this.isLoading = false;
     this.errorMessage = 'Error al conectar con el servidor';
     console.error('Error de registro:', error);
+  }
+
+  togglePasswordVisibility(field: string): void {
+    if (field === 'password') {
+      this.showPassword = !this.showPassword;
+    } else {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    }
+  }
+
+  resetForm(): void {
+    if (confirm('¿Estás seguro de que quieres limpiar el formulario?')) {
+      this.registerForm.reset({
+        pais: 'España',
+        terminos: false
+      });
+      this.selectedFile = null;
+    }
+  }
+
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 }

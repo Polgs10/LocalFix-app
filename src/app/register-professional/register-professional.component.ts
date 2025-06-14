@@ -2,25 +2,26 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
+import { AuthService } from '../auth.service';
+import { ApiResponse } from '../model/ApiResponse.model';
 
 @Component({
   selector: 'app-register-professional',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './register-professional.component.html',
   styleUrl: './register-professional.component.css'
 })
 export class RegisterProfessionalComponent {
 
-  username: string | null = null;
+  user: any;
   error: string | null = null;
   isLoading = true;
-  userProfileId: number | null = null;
   guilds: string[] = [];
   selectedFile: File | null = null;
   imagePreview: string = 'https://via.placeholder.com/120x120?text=Logo';
 
-  // Datos del formulario
   professionalData = {
     businessName: '',
     guild: '',
@@ -38,90 +39,61 @@ export class RegisterProfessionalComponent {
     isPrimary: true
   };
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      const username = params.get('username');
-      if (username) {
-        this.username = username;
-        this.loadUserId(username);
-      } else {
-        this.error = 'User not found';
-        this.isLoading = false;
-      }
-    });
+    this.user = this.authService.getCurrentUser();
+    this.isLoading = false;
+    this.loadGuilds();
   }
 
   goBack() {
-    this.router.navigate(['/user/professional-profile/payment/', this.username]);
-  }
-
-  loadUserId(username: string): void {
-    this.http.get<number>(`http://localhost:8080/api/users/id/${username}`)
-      .subscribe({
-        next: (id) => {
-          this.userProfileId = id;
-          this.loadGuilds();
-        },
-        error: (err) => {
-          this.error = 'User not found';
-          this.isLoading = false;
-          console.error(err);
-        }
-      });
+    this.router.navigate(['/user/professional-profile/payment/', this.user.username]);
   }
 
   loadGuilds(): void {
-    this.http.get<string[]>('http://localhost:8080/api/guilds/categories').subscribe({
-      next: (data) => {
-        this.guilds = data;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading categories', err);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  onFileSelected(event: any): void {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-
-      // Mostrar vista previa de la imagen
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.imagePreview = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    this.http.get<ApiResponse<string[]>>('http://localhost:8080/api/guilds/categories')
+      .subscribe({
+        next: (res) => this.guilds = res.data,
+        error: (err) => console.error('Error loading categories', err)
+      })
   }
 
   onSubmit(): void {
-    if (!this.username || !this.userProfileId) {
+    if (!this.user.username || !this.user.id) {
       this.error = 'User information not available';
+      this.isLoading = false;
       return;
     }
 
-    // Validación básica
     if (!this.professionalData.businessName ||
-        !this.professionalData.guild ||
-        !this.professionalData.mobilePhone) {
+      !this.professionalData.guild ||
+      !this.professionalData.mobilePhone ||
+      !this.professionalData.email ||
+      !this.professionalData.description ||
+      !this.professionalData.address ||
+      !this.professionalData.city ||
+      !this.professionalData.postalCode ||
+      !this.professionalData.province ||
+      !this.professionalData.country ||
+      !this.professionalData.businessHours) {
       this.error = 'Por favor, complete los campos obligatorios';
+      this.isLoading = false;
       return;
     }
 
     this.isLoading = true;
 
     const requestData = {
-      username: this.username,
+      username: this.user.username,
       ...this.professionalData
     };
 
     if (this.selectedFile) {
-      // Usar el nuevo endpoint con imagen
       const formData = new FormData();
       formData.append('professionalData', JSON.stringify(requestData));
       formData.append('businessImage', this.selectedFile);
@@ -130,7 +102,7 @@ export class RegisterProfessionalComponent {
         .subscribe({
           next: (isCreated) => {
             if (isCreated) {
-              this.router.navigate(['/user/professional-profile/', this.username]);
+              this.router.navigate(['/user/professional-profile/', this.user.username]);
             }
           },
           error: (err) => {
@@ -140,12 +112,11 @@ export class RegisterProfessionalComponent {
           }
         });
     } else {
-      // Usar el endpoint existente sin imagen
       this.http.post<boolean>('http://localhost:8080/api/professionals', requestData)
         .subscribe({
           next: (isCreated) => {
             if (isCreated) {
-              this.router.navigate(['/user/professional-profile/', this.username]);
+              this.router.navigate(['/user/professional-profile/', this.user.username]);
             }
           },
           error: (err) => {
@@ -157,7 +128,19 @@ export class RegisterProfessionalComponent {
     }
   }
 
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   cancelRegistration(): void {
-    this.router.navigate(['/layout', this.username]);
+    this.router.navigate(['/layout', this.user.username]);
   }
 }

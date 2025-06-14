@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Service } from '../model/service.model';
 import { FooterComponent } from "../layout/footer/footer.component";
+import { AuthService } from '../auth.service';
+import { ApiResponse } from '../model/ApiResponse.model';
 
 @Component({
   selector: 'app-user-profile-professional',
@@ -24,7 +26,7 @@ export class UserProfileProfessionalComponent {
   selectedRating = 0;
   showReviewModal = false;
   newReviewComment = '';
-  username: string | null = null;
+  user: any;
   guilds: string[] = [];
   isEditMode = false;
   originalProfessional: ProfessionalDetails | null = null;
@@ -33,20 +35,12 @@ export class UserProfileProfessionalComponent {
 
   originalImageUrl: string = '';
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
+  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      const username = params.get('username');
-      if (username) {
-        this.username = username;
-        this.isProfessional(username);
+    this.user = this.authService.getCurrentUser();
+        this.isProfessional(this.user.username);
         this.loadGuilds();
-      } else {
-        this.error = 'Professional not found';
-        this.isLoading = false;
-      }
-    });
   }
 
   getStars(rating: number): string[] {
@@ -81,8 +75,8 @@ export class UserProfileProfessionalComponent {
           if (isProfessional) {
             this.loadProfessionalId(username);
           } else {
-            if (this.username) {
-              this.viewPayment(this.username);
+            if (this.user.username) {
+              this.viewPayment(this.user.username);
             }
           }
         },
@@ -95,10 +89,11 @@ export class UserProfileProfessionalComponent {
   }
 
   loadGuilds(): void {
-    this.http.get<string[]>('http://localhost:8080/api/guilds/categories').subscribe({
-      next: (data) => this.guilds = data,
-      error: (err) => console.error('Error loading categories', err)
-    });
+    this.http.get<ApiResponse<string[]>>('http://localhost:8080/api/guilds/categories')
+      .subscribe({
+        next: (res) => this.guilds = res.data,
+        error: (err) => console.error('Error loading categories', err)
+      })
   }
 
   loadProfessionalId(username: string): void {
@@ -122,11 +117,11 @@ export class UserProfileProfessionalComponent {
   loadProfessionalDetails(): void {
     if (!this.professionalId) return;
 
-    this.http.get<ProfessionalDetails>(`http://localhost:8080/api/professionals/${this.professionalId}/details`)
+    this.http.get<ApiResponse<ProfessionalDetails>>(`http://localhost:8080/api/professionals/details/${this.professionalId}`)
       .subscribe({
-        next: (data) => {
-          this.professional = data;
-          this.originalProfessional = {...data};
+        next: (res) => {
+          this.professional = res.data;
+          this.originalProfessional = {...res.data};
 
           this.http.get(`http://localhost:8080/api/professionals/${this.professionalId}/business-image`,
             { responseType: 'text' })
@@ -157,11 +152,10 @@ export class UserProfileProfessionalComponent {
   loadProfessionalLocations(): void {
     if (!this.professionalId) return;
 
-    this.http.get<ProfessionalLocation[]>(`http://localhost:8080/api/professional-locations/${this.professionalId}/locations`)
+    this.http.get<ApiResponse<ProfessionalLocation[]>>(`http://localhost:8080/api/professional-locations/locations/${this.professionalId}`)
       .subscribe({
-        next: (data) => {
-          console.log(data);
-          this.professionalLocations = data;
+        next: (res) => {
+          this.professionalLocations = res.data;
         },
         error: (err) => {
           console.error('Error loading locations', err);
@@ -171,10 +165,10 @@ export class UserProfileProfessionalComponent {
 
   loadProfessionalServices(): void {
     if (!this.professionalId) return;
-    this.http.get<ProfessionalService[]>(`http://localhost:8080/api/services/${this.professionalId}/services`)
+    this.http.get<ApiResponse<ProfessionalService[]>>(`http://localhost:8080/api/services/services-professional/${this.professionalId}`)
       .subscribe({
-        next: (data) => {
-          this.professionalServices = data;
+        next: (res) => {
+          this.professionalServices = res.data;
         },
         error: (err) => {
           console.error('Error loading services', err);
@@ -184,10 +178,10 @@ export class UserProfileProfessionalComponent {
 
   loadProfessionalRatings(): void {
     if (!this.professionalId) return;
-    this.http.get<ProfessionalRating[]>(`http://localhost:8080/api/ratings/${this.professionalId}/ratings`)
+    this.http.get<ApiResponse<ProfessionalRating[]>>(`http://localhost:8080/api/ratings/ratings/${this.professionalId}`)
       .subscribe({
-        next: (data) => {
-          this.professionalRatings = data;
+        next: (res) => {
+          this.professionalRatings = res.data;
           this.isLoading = false;
         },
         error: (err) => {
@@ -335,7 +329,7 @@ export class UserProfileProfessionalComponent {
   }
 
   goBack() {
-    this.router.navigate(['/layout', this.username]);
+    this.router.navigate(['/layout', this.user.username]);
   }
 
   isEditingService: boolean | null = null;

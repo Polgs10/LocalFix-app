@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-payment',
@@ -12,24 +12,19 @@ export class PaymentComponent {
   currentDiscount = 0;
   basePrice = 5.00;
   taxRate = 0.21;
-  username: string | null = null;
   error: string | null = null;
   isLoading = true;
+  user: any;
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
 
-    this.route.paramMap.subscribe(params => {
-      const username = params.get('username');
-      if (username) {
-        this.username = username;
-      } else {
-        this.error = 'Professional not found';
-        this.isLoading = false;
-      }
-    });
-    // Rellenar automáticamente los campos con datos válidos para pruebas
+    this.user = this.authService.getCurrentUser();
+
     setTimeout(() => {
       const cardNumber = document.getElementById('card-number') as HTMLInputElement;
       const cardholderName = document.getElementById('cardholder-name') as HTMLInputElement;
@@ -46,16 +41,11 @@ export class PaymentComponent {
   }
 
   goBack() {
-  if (this.username) {
-    this.router.navigate(['/layout', this.username]);
-  } else {
-    this.router.navigate(['/login']); // Fallback si no hay username
-  }
-}
-
-  updatePaymentMethod(method: string) {
-    // Esta función puede mantenerse para estilizar los métodos de pago seleccionados
-    console.log('Método de pago seleccionado:', method);
+    if (this.user.username) {
+      this.router.navigate(['/layout', this.user.username]);
+    } else {
+      this.router.navigate(['/login']);
+    }
   }
 
   formatCardNumber(input: HTMLInputElement) {
@@ -90,8 +80,8 @@ export class PaymentComponent {
   }
 
   handlePayment() {
-  if (this.username) {
-    this.router.navigate(['/user/register/professional-profile', this.username]);
+  if (this.user.username) {
+    this.router.navigate(['/user/register/professional-profile', this.user.username]);
   }
 }
 

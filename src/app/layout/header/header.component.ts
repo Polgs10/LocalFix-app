@@ -12,14 +12,12 @@ import { AuthService } from '../../auth.service';
 })
 export class HeaderComponent {
   isMenuOpen = false;
-  username: string | null = null;
+  user: any;
 
   constructor(private route: ActivatedRoute, private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.route.parent?.paramMap.subscribe(params => {
-      this.username = params.get('username');
-    });
+    this.user = this.authService.getCurrentUser();
   }
 
   toggleMenu(): void {

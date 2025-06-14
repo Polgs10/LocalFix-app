@@ -1,11 +1,11 @@
 <nav class="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
   <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto">
-    <a [routerLink]="['/layout', username]" class="flex items-center space-x-3 rtl:space-x-reverse">
+    <a [routerLink]="['/layout', user.username]" class="flex items-center space-x-3 rtl:space-x-reverse">
       <img src="https://res.cloudinary.com/dfo0yi2me/image/upload/v1749677690/Dise%C3%B1o_sin_t%C3%ADtulo-removebg-preview_kwpb5r.png" class="h-28" alt="Logo" />
     </a>
     <div class="flex items-center space-x-4">
-      <span *ngIf="username" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-        Hola, {{username}}
+      <span *ngIf="user.username" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        Hola, {{user.username}}
       </span>
       <button (click)="toggleMenu()" type="button" class="inline-flex items-center justify-center p-2 w-10 h-10 text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-hamburger" [attr.aria-expanded]="isMenuOpen">
         <span class="sr-only">Abrir menu</span>
@@ -17,12 +17,12 @@
     <div [class.hidden]="!isMenuOpen" class="w-full" id="navbar-hamburger">
       <ul class="flex flex-col font-medium mt-1 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
         <li>
-          <a [routerLink]="['/user/profile', username]"
+          <a [routerLink]="['/user/profile', user.username]"
             class="block py-2 px-3 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white"
             (click)="closeMenu()">Perfil</a>
         </li>
         <li>
-          <a [routerLink]="['/user/professional-profile', username]"
+          <a [routerLink]="['/user/professional-profile', user.username]"
             class="block py-2 px-3 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white"
             (click)="closeMenu()">Profesional</a>
         </li>
