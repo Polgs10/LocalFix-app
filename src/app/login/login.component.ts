@@ -39,7 +39,7 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (this.loginForm.invalid) {
-      return;
+        return;
     }
 
     this.isLoading = true;
@@ -48,14 +48,18 @@ export class LoginComponent {
     const { email, password } = this.loginForm.value;
 
     this.authService.login(email, password).subscribe({
-      next: () => {
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = 'Credenciales incorrectas o error de servidor';
-        this.isLoading = false;
-        console.error('Login error:', error);
-      }
+        next: () => {
+            this.isLoading = false;
+        },
+        error: (error) => {
+            this.isLoading = false;
+            if (error.status === 401 || error.error?.message === 'Invalid credentials') {
+                this.errorMessage = 'Credenciales incorrectas. Por favor, inténtalo de nuevo.';
+            } else {
+                this.errorMessage = 'Error de conexión con el servidor. Por favor, inténtalo más tarde.';
+            }
+            console.error('Login error:', error);
+        }
     });
   }
 }

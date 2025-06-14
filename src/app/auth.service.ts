@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, map, tap, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { ApiResponse } from './model/ApiResponse.model';
+import { HttpStatus } from './model/http-status.const';
 
 interface AuthResponse {
   accessToken: string;
@@ -37,8 +39,8 @@ export class AuthService {
     }
   }
 
-  login(email: string, password: string): Observable<boolean> {
-    return this.http.post<AuthResponse>(
+  login(email: string, password: string): Observable<ApiResponse<AuthResponse>> {
+    return this.http.post<ApiResponse<AuthResponse>>(
         'http://localhost:8080/api/users/login',
         { email, password },
         {
@@ -49,21 +51,22 @@ export class AuthService {
         }
     ).pipe(
         tap(response => {
-            this.storeAccessToken(response.accessToken);
-            this.storeUserData({
-                id: response.id,
-                username: response.username,
-                email: response.email
-            });
-            this.isAuthenticatedSubject.next(true);
-            this.currentUserSubject.next({
-                id: response.id,
-                username: response.username,
-                email: response.email
-            });
-            this.router.navigate(['/layout', response.username]);
+            if (response.status === HttpStatus.OK) {
+                this.storeAccessToken(response.data.accessToken);
+                this.storeUserData({
+                    id: response.data.id,
+                    username: response.data.username,
+                    email: response.data.email
+                });
+                this.isAuthenticatedSubject.next(true);
+                this.currentUserSubject.next({
+                    id: response.data.id,
+                    username: response.data.username,
+                    email: response.data.email
+                });
+                this.router.navigate(['/layout', response.data.username]);
+            }
         }),
-        map(() => true),
         catchError(error => {
             console.error('Login error:', error);
             return throwError(() => error);

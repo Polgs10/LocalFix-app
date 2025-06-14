@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-sign-up',
@@ -58,30 +58,88 @@ export class SignUpComponent {
     this.isLoading = true;
     this.errorMessage = null;
 
-    const userData = {
-      name: this.registerForm.value.nombre,
-      username: this.registerForm.value.username,
-      firstName: this.registerForm.value.primerApellido,
-      lastName: this.registerForm.value.segundoApellido,
-      email: this.registerForm.value.email,
-      phone: this.registerForm.value.telefono,
-      password: this.registerForm.value.password,
-      address: this.registerForm.value.direccion,
-      city: this.registerForm.value.ciudad,
-      province: this.registerForm.value.provincia,
-      postalCode: this.registerForm.value.codigoPostal,
-      country: this.registerForm.value.pais
-    };
+    // Primero verificamos si el username o email ya existen
+    this.http.get<boolean>(`${this.apiUrl}/exists/username/${this.registerForm.value.username}`).pipe(
+      switchMap(usernameExists => {
+        if (usernameExists) {
+          throw new Error('usernameExists');
+        }
+        return this.http.get<boolean>(`${this.apiUrl}/exists/email/${this.registerForm.value.email}`);
+      }),
+      switchMap(emailExists => {
+        if (emailExists) {
+          throw new Error('emailExists');
+        }
 
-    if (this.selectedFile) {
-      this.registerWithImage(userData, this.selectedFile).subscribe({
-        next: (success) => this.handleRegistrationResponse(success),
-        error: (error) => this.handleRegistrationError(error)
+        const userData = {
+          name: this.registerForm.value.nombre,
+          username: this.registerForm.value.username,
+          firstName: this.registerForm.value.primerApellido,
+          lastName: this.registerForm.value.segundoApellido,
+          email: this.registerForm.value.email,
+          phone: this.registerForm.value.telefono,
+          password: this.registerForm.value.password,
+          address: this.registerForm.value.direccion,
+          city: this.registerForm.value.ciudad,
+          province: this.registerForm.value.provincia,
+          postalCode: this.registerForm.value.codigoPostal,
+          country: this.registerForm.value.pais
+        };
+
+        if (this.selectedFile) {
+          return this.registerWithImage(userData, this.selectedFile);
+        } else {
+          return this.http.post<boolean>(`${this.apiUrl}/register`, userData);
+        }
+      }),
+      catchError(error => {
+        if (error.message === 'usernameExists') {
+          this.errorMessage = 'El nombre de usuario ya está en uso';
+        } else if (error.message === 'emailExists') {
+          this.errorMessage = 'El correo electrónico ya está registrado';
+        } else {
+          this.errorMessage = 'Error al conectar con el servidor';
+        }
+        this.isLoading = false;
+        return of(false);
+      })
+    ).subscribe({
+      next: (success) => {
+        if (success) {
+          this.handleRegistrationResponse(success);
+        }
+      }
+    });
+  }
+
+  checkUsernameExists(): void {
+    const username = this.registerForm.get('username')?.value;
+    if (username) {
+      this.http.get<boolean>(`${this.apiUrl}/exists/username/${username}`).subscribe({
+        next: (exists) => {
+          if (exists) {
+            this.registerForm.get('username')?.setErrors({ usernameExists: true });
+          }
+        },
+        error: () => {
+          // Manejar error si es necesario
+        }
       });
-    } else {
-      this.http.post<boolean>(`${this.apiUrl}/register`, userData).subscribe({
-        next: (success) => this.handleRegistrationResponse(success),
-        error: (error) => this.handleRegistrationError(error)
+    }
+  }
+
+  checkEmailExists(): void {
+    const email = this.registerForm.get('email')?.value;
+    if (email) {
+      this.http.get<boolean>(`${this.apiUrl}/exists/email/${email}`).subscribe({
+        next: (exists) => {
+          if (exists) {
+            this.registerForm.get('email')?.setErrors({ emailExists: true });
+          }
+        },
+        error: () => {
+          // Manejar error si es necesario
+        }
       });
     }
   }
