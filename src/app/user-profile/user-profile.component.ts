@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserProfile, UserProfileLocation, UserProfileRating } from '../model/user.model';
 import { FooterComponent } from "../layout/footer/footer.component";
+import { AuthService } from '../auth.service';
 
 
 @Component({
@@ -34,7 +35,7 @@ export class UserProfileComponent {
 
   private baseImageUrl = "http://localhost:8080/uploads/";
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
+  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
 
   ngOnInit(): void {
 
@@ -226,6 +227,24 @@ export class UserProfileComponent {
     const joinDate = new Date(this.userProfile.date);
     const today = new Date();
     return today.getFullYear() - joinDate.getFullYear();
+  }
+
+  deleteAccount(): void {
+    if (confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.')) {
+      if (!this.userProfileId) return;
+
+      this.http.delete(`http://localhost:8080/api/users/${this.userProfileId}`)
+        .subscribe({
+          next: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            console.error('Error deleting account', err);
+            alert('Error al eliminar la cuenta');
+          }
+        });
+    }
   }
 
   getStars(score: number): string[] {

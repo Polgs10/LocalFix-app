@@ -481,6 +481,24 @@ export class UserProfileProfessionalComponent {
     }
   }
 
+  deleteProfessionalAccount(): void {
+    if (confirm('¿Estás seguro de que deseas eliminar tu cuenta profesional? Esta acción no se puede deshacer.')) {
+      if (!this.professionalId) return;
+
+      this.http.delete(`http://localhost:8080/api/professionals/${this.professionalId}`)
+        .subscribe({
+          next: () => {
+            // Redirigir al layout
+            this.router.navigate(['/layout', this.user.username]);
+          },
+          error: (err) => {
+            console.error('Error deleting professional account', err);
+            alert('Error al eliminar la cuenta profesional');
+          }
+        });
+    }
+  }
+
   getStars(rating: number): string[] {
     const stars = [];
     const fullStars = Math.floor(rating);
