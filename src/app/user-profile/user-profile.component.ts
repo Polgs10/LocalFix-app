@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UserProfile, UserProfileLocation, UserProfileRating } from '../model/user.model';
 import { FooterComponent } from "../layout/footer/footer.component";
 import { AuthService } from '../auth.service';
+import { debounceTime, distinctUntilChanged, Observable, of, switchMap, tap } from 'rxjs';
 
 
 @Component({
@@ -33,6 +34,11 @@ export class UserProfileComponent {
   newPassword: string = '';
   confirmPassword: string = '';
 
+  emailExists = false;
+  checkingEmail = false;
+  originalEmail = '';
+
+
   private baseImageUrl = "http://localhost:8080/uploads/";
 
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
@@ -50,6 +56,33 @@ export class UserProfileComponent {
       }
     });
 
+  }
+
+  public setupEmailValidation(): void {
+    // Usamos el mismo patrón que en el registro
+    of(this.userProfile?.email).pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      tap(() => this.checkingEmail = true),
+      switchMap(email => {
+        if (!email || email === this.originalEmail) {
+          return of(false); // No validar si es el mismo email o está vacío
+        }
+        return this.checkEmailAvailability(email);
+      })
+    ).subscribe({
+      next: (exists) => {
+        this.emailExists = exists;
+        this.checkingEmail = false;
+      },
+      error: () => this.checkingEmail = false
+    });
+  }
+
+  // Reutiliza el mismo método de verificación
+  private checkEmailAvailability(email: string): Observable<boolean> {
+    if (!email) return of(false);
+    return this.http.get<boolean>(`http://localhost:8080/api/users/check-email/${email}`);
   }
 
   triggerFileInput() {
@@ -126,6 +159,8 @@ export class UserProfileComponent {
       .subscribe({
         next: (userProfile) => {
           this.userProfile = userProfile;
+          this.originalEmail = userProfile.email;
+          this.setupEmailValidation();
           this.http.get(`http://localhost:8080/api/users/${this.userProfileId}/profile-image`, { responseType: 'text' })
           .subscribe({
             next: (imagePath: string) => {
