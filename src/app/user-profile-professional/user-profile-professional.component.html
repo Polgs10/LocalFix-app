@@ -142,20 +142,30 @@
                       <label for="business-name" class="block text-sm font-medium text-gray-700 mb-2">
                         Nombre del Negocio
                       </label>
-                      <input
-                        id="business-name"
-                        name="business-name"
-                        type="text"
-                        [(ngModel)]="professional.businessName"
-                        [readonly]="!isEditMode"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        [class.bg-gray-100]="!isEditMode"
-                        [class.text-gray-500]="!isEditMode"
-                        [class.cursor-not-allowed]="!isEditMode"
-                        [class.bg-white]="isEditMode"
-                        [class.text-gray-900]="isEditMode"
-                        required
-                      >
+                      <div class="relative">
+                        <input
+                          id="business-name"
+                          name="business-name"
+                          type="text"
+                          [(ngModel)]="professional.businessName"
+                          (ngModelChange)="businessNameSubject.next($event)"
+                          [readonly]="!isEditMode"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          [class.bg-gray-100]="!isEditMode"
+                          [class.text-gray-500]="!isEditMode"
+                          [class.cursor-not-allowed]="!isEditMode"
+                          [class.bg-white]="isEditMode"
+                          [class.text-gray-900]="isEditMode"
+                          [class.border-red-500]="businessNameExists"
+                          required
+                        >
+                        <div *ngIf="checkingBusinessName" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                          <i class="fas fa-spinner fa-spin text-gray-400"></i>
+                        </div>
+                      </div>
+                      <div *ngIf="businessNameExists" class="text-red-500 text-xs mt-1">
+                        Este nombre de negocio ya está en uso
+                      </div>
                     </div>
 
                     <!-- Email -->
@@ -163,20 +173,30 @@
                       <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                         Email
                       </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        [(ngModel)]="professional.email"
-                        [readonly]="!isEditMode"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        [class.bg-gray-100]="!isEditMode"
-                        [class.text-gray-500]="!isEditMode"
-                        [class.cursor-not-allowed]="!isEditMode"
-                        [class.bg-white]="isEditMode"
-                        [class.text-gray-900]="isEditMode"
-                        required
-                      >
+                      <div class="relative">
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          [(ngModel)]="professional.email"
+                          (ngModelChange)="emailSubject.next($event)"
+                          [readonly]="!isEditMode"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          [class.bg-gray-100]="!isEditMode"
+                          [class.text-gray-500]="!isEditMode"
+                          [class.cursor-not-allowed]="!isEditMode"
+                          [class.bg-white]="isEditMode"
+                          [class.text-gray-900]="isEditMode"
+                          [class.border-red-500]="emailExists"
+                          required
+                        >
+                        <div *ngIf="checkingEmail" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                          <i class="fas fa-spinner fa-spin text-gray-400"></i>
+                        </div>
+                      </div>
+                      <div *ngIf="emailExists" class="text-red-500 text-xs mt-1">
+                        Este email ya está registrado
+                      </div>
                     </div>
 
                     <!-- Gremio -->
@@ -250,6 +270,7 @@
                     <button
                       type="submit"
                       class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+                      [disabled]="businessNameExists || emailExists"
                     >
                       <i class="fas fa-save mr-2"></i>
                       Guardar Cambios

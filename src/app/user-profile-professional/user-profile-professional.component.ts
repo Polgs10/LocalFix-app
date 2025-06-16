@@ -8,6 +8,7 @@ import { Service } from '../model/service.model';
 import { FooterComponent } from "../layout/footer/footer.component";
 import { AuthService } from '../auth.service';
 import { ApiResponse } from '../model/ApiResponse.model';
+import { debounceTime, distinctUntilChanged, Observable, of, Subject, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-user-profile-professional',
@@ -31,7 +32,12 @@ export class UserProfileProfessionalComponent {
   isEditMode = false;
   originalProfessional: ProfessionalDetails | null = null;
 
-  private baseImageUrl = "http://localhost:8080/uploads/";
+  businessNameExists = false;
+  emailExists = false;
+  checkingBusinessName = false;
+  checkingEmail = false;
+  originalBusinessName = '';
+  originalEmail = '';
 
   originalImageUrl: string = '';
 
@@ -57,10 +63,16 @@ export class UserProfileProfessionalComponent {
     private router: Router,
     private authService: AuthService) {}
 
+  private baseImageUrl = "http://localhost:8080/uploads/";
+  public businessNameSubject = new Subject<string>();
+  public emailSubject = new Subject<string>();
+
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     this.isProfessional(this.user.username);
     this.loadGuilds();
+    this.setupBusinessNameValidation();
+    this.setupEmailValidation();
   }
 
 
@@ -123,6 +135,8 @@ export class UserProfileProfessionalComponent {
         next: (res) => {
           this.professional = res.data;
           this.originalProfessional = {...res.data};
+          this.originalBusinessName = res.data.businessName;
+          this.originalEmail = res.data.email;
 
           this.http.get(`http://localhost:8080/api/professionals/${this.professionalId}/business-image`,
             { responseType: 'text' })
@@ -198,6 +212,16 @@ export class UserProfileProfessionalComponent {
   handleProfileUpdate(event: Event): void {
     event.preventDefault();
     if (!this.professionalId || !this.professional) return;
+
+    if (this.businessNameExists && this.professional.businessName !== this.originalBusinessName) {
+      alert('El nombre del negocio ya está en uso');
+      return;
+    }
+
+    if (this.emailExists && this.professional.email !== this.originalEmail) {
+      alert('El email ya está registrado');
+      return;
+    }
 
     const updateRequest = {
       professionalId: this.professionalId,
@@ -533,5 +557,53 @@ export class UserProfileProfessionalComponent {
         this.professional = {...this.originalProfessional};
         this.professional.imageUrl = this.originalImageUrl;
     }
+  }
+
+  private setupBusinessNameValidation(): void {
+    this.businessNameSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      tap(() => this.checkingBusinessName = true),
+      switchMap(name => this.checkBusinessNameAvailability(name))
+    ).subscribe({
+      next: exists => {
+        this.businessNameExists = exists;
+        this.checkingBusinessName = false;
+      },
+      error: () => this.checkingBusinessName = false
+    });
+  }
+
+  private setupEmailValidation(): void {
+    this.emailSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      tap(() => this.checkingEmail = true),
+      switchMap(email => this.checkEmailAvailability(email))
+    ).subscribe({
+      next: exists => {
+        this.emailExists = exists;
+        this.checkingEmail = false;
+      },
+      error: () => this.checkingEmail = false
+    });
+  }
+
+  private checkBusinessNameAvailability(businessName: string): Observable<boolean> {
+    if (!businessName || businessName === this.originalBusinessName) {
+      return of(false);
+    }
+    return this.http.get<boolean>(
+      `http://localhost:8080/api/professionals/check-business-name/${businessName}`
+    );
+  }
+
+  private checkEmailAvailability(email: string): Observable<boolean> {
+    if (!email || email === this.originalEmail) {
+      return of(false);
+    }
+    return this.http.get<boolean>(
+      `http://localhost:8080/api/professionals/check-email/${email}`
+    );
   }
 }

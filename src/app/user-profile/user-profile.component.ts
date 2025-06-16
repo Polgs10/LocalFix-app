@@ -38,7 +38,6 @@ export class UserProfileComponent {
   checkingEmail = false;
   originalEmail = '';
 
-
   private baseImageUrl = "http://localhost:8080/uploads/";
 
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
@@ -59,14 +58,13 @@ export class UserProfileComponent {
   }
 
   public setupEmailValidation(): void {
-    // Usamos el mismo patrón que en el registro
     of(this.userProfile?.email).pipe(
       debounceTime(500),
       distinctUntilChanged(),
       tap(() => this.checkingEmail = true),
       switchMap(email => {
         if (!email || email === this.originalEmail) {
-          return of(false); // No validar si es el mismo email o está vacío
+          return of(false);
         }
         return this.checkEmailAvailability(email);
       })
@@ -79,7 +77,6 @@ export class UserProfileComponent {
     });
   }
 
-  // Reutiliza el mismo método de verificación
   private checkEmailAvailability(email: string): Observable<boolean> {
     if (!email) return of(false);
     return this.http.get<boolean>(`http://localhost:8080/api/users/check-email/${email}`);
@@ -91,6 +88,12 @@ export class UserProfileComponent {
 
   handleProfileUpdate() {
     if (!this.userProfile || !this.userProfileLocation || !this.userProfileId) {
+      return;
+    }
+
+
+    if (this.emailExists && this.userProfile.email !== this.originalEmail) {
+      alert('Este email ya está registrado');
       return;
     }
 
